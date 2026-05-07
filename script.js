@@ -242,12 +242,22 @@ function updateTodayLabel() {
 function updateStats() {
     var today = todayStr();
     var todayOrders = orders.filter(function(o) {
-        return o.washingDate === today;
+        var createdDate = o.createdAt ? o.createdAt.split('T')[0] : '';
+        return o.washingDate === today || createdDate === today;
     });
-    var totalArea = orders.reduce(function(s,o) { return s + ((o.width||0)*(o.height||0)); }, 0);
+    var totalArea = orders.reduce(function(s,o) { return s + (parseFloat(o.totalArea)||0); }, 0);
+    
+    // Bugun olib kelingan zakazlar summasi
+    var todayRevenue = todayOrders.reduce(function(s,o) { return s + (parseFloat(o.price)||0); }, 0);
+
     var t1 = document.getElementById('totalOrdersStat'); if (t1) t1.textContent = orders.length;
     var t2 = document.getElementById('todayOrdersStat'); if (t2) t2.textContent = todayOrders.length;
     var t3 = document.getElementById('totalAreaStat');   if (t3) t3.textContent = totalArea.toFixed(1);
+    var t4 = document.getElementById('todayRevenueStat'); if (t4) {
+        if (todayRevenue >= 1000000) t4.textContent = (todayRevenue/1000000).toFixed(1) + 'M';
+        else if (todayRevenue >= 1000) t4.textContent = (todayRevenue/1000).toFixed(0) + 'k';
+        else t4.textContent = todayRevenue;
+    }
 }
 
 function updateTodayBadge() {
@@ -330,7 +340,7 @@ function setTodayFilter(btn, filter) {
 function makeTodayCard(order, idx) {
     var sc = STATUS_CFG[order.status] || STATUS_CFG.new;
     var showId = order.displayId || String(order.id).slice(-6);
-    var area = ((order.width||0)*(order.height||0)).toFixed(1);
+    var area = (parseFloat(order.totalArea)||0).toFixed(1);
     var div = document.createElement('div');
     div.className = 'queue-item status-' + order.status;
 
@@ -375,18 +385,33 @@ function makeOrderCard(order) {
 // =================== PROFIL PAGE ===================
 function updateProfileStats() {
     var today = todayStr();
-    var todayO = orders.filter(function(o) { return o.washingDate === today; });
+    var now = new Date();
+    var weekStart = new Date(); weekStart.setDate(weekStart.getDate() - 7);
+    var monthStart = new Date(); monthStart.setMonth(monthStart.getMonth() - 1);
+
+    var todayO = orders.filter(function(o) { 
+        var createdDate = o.createdAt ? o.createdAt.split('T')[0] : '';
+        return o.washingDate === today || createdDate === today; 
+    });
+    
+    var weekO = orders.filter(function(o) {
+        if(!o.createdAt) return false;
+        var d = new Date(o.createdAt);
+        return d >= weekStart;
+    });
+    
+    var monthO = orders.filter(function(o) {
+        if(!o.createdAt) return false;
+        var d = new Date(o.createdAt);
+        return d >= monthStart;
+    });
+
     var paidRev = orders.filter(function(o) { return o.paymentStatus === 'paid'; }).reduce(function(s,o) { return s + (parseFloat(o.price)||0); }, 0);
     var readyCount = orders.filter(function(o) { return o.status === 'ready' || o.status === 'done'; }).length;
 
     var el1 = document.getElementById('profJami');    if (el1) el1.textContent = orders.length;
     var el2 = document.getElementById('profTayyor');  if (el2) el2.textContent = readyCount;
-    var el3 = document.getElementById('profDaromad'); if (el3) el3.textContent = (paidRev/1000).toFixed(0) + 'k';
-
-    var weekStart = new Date(); weekStart.setDate(weekStart.getDate()-7);
-    var monthStart = new Date(); monthStart.setDate(monthStart.getDate()-30);
-    var weekO  = orders.filter(function(o) { return new Date(o.createdAt) >= weekStart; });
-    var monthO = orders.filter(function(o) { return new Date(o.createdAt) >= monthStart; });
+    var el3 = document.getElementById('profDaromad'); if (el3) el3.textContent = (paidRev >= 1000000 ? (paidRev/1000000).toFixed(1) + 'M' : (paidRev/1000).toFixed(0) + 'k');
 
     var todayRev  = todayO.filter(function(o){ return o.paymentStatus==='paid'; }).reduce(function(s,o){ return s+(parseFloat(o.price)||0); }, 0);
     var weekRev   = weekO.filter(function(o){ return o.paymentStatus==='paid'; }).reduce(function(s,o){ return s+(parseFloat(o.price)||0); }, 0);
@@ -398,11 +423,11 @@ function updateProfileStats() {
     var box = document.getElementById('profStatsBox');
     if (box) {
         box.innerHTML =
-            '<div class="stat-row"><span class="stat-row-label">📅 Bugungi zakazlar (yuvish)</span><span class="stat-row-value">' + todayO.length + '</span></div>' +
-            '<div class="stat-row"><span class="stat-row-label">📅 Bugun daromad</span><span class="stat-row-value">' + todayRev.toLocaleString() + " so'm</span></div>" +
-            '<div class="stat-row"><span class="stat-row-label">📅 Haftalik daromad</span><span class="stat-row-value">' + weekRev.toLocaleString() + " so'm</span></div>" +
-            '<div class="stat-row"><span class="stat-row-label">📅 Oylik daromad</span><span class="stat-row-value">' + monthRev.toLocaleString() + " so'm</span></div>" +
-            '<div class="stat-row"><span class="stat-row-label">💰 To\'langan</span><span class="stat-row-value">' + paid + '</span></div>' +
+            '<div class="stat-row"><span class="stat-row-label">📅 Bugungi zakazlar (jami)</span><span class="stat-row-value">' + todayO.length + '</span></div>' +
+            '<div class="stat-row"><span class="stat-row-label">💰 Bugungi daromad</span><span class="stat-row-value">' + todayRev.toLocaleString() + " so'm</span></div>" +
+            '<div class="stat-row"><span class="stat-row-label">📈 Haftalik daromad</span><span class="stat-row-value">' + weekRev.toLocaleString() + " so'm</span></div>" +
+            '<div class="stat-row"><span class="stat-row-label">📊 Oylik daromad</span><span class="stat-row-value">' + monthRev.toLocaleString() + " so'm</span></div>" +
+            '<div class="stat-row"><span class="stat-row-label">✅ To\'langan</span><span class="stat-row-value">' + paid + '</span></div>' +
             '<div class="stat-row"><span class="stat-row-label">❌ To\'lanmagan</span><span class="stat-row-value">' + (orders.length - paid) + '</span></div>' +
             '<div class="stat-row"><span class="stat-row-label">⏳ Jarayonda</span><span class="stat-row-value">' + qCount + '</span></div>';
     }
@@ -460,9 +485,53 @@ function loadProductPricesFromAdmin() {
     }
 }
 
+// =================== GPS LOCATION CAPTURE ===================
+function captureGPSLocation() {
+    var btn = document.getElementById('fo-gps-btn');
+    if (!btn) return;
+    
+    btn.disabled = true;
+    btn.textContent = '⏳ Uzilmoqda...';
+    
+    if (!navigator.geolocation) {
+        showToast('❌ GPS qo\'llab-quvvatlanmadi', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-location-arrow"></i> GPS';
+        return;
+    }
+    
+    navigator.geolocation.getCurrentPosition(function(position) {
+        var lat = position.coords.latitude;
+        var lng = position.coords.longitude;
+        var coords = lat.toFixed(6) + ',' + lng.toFixed(6);
+        
+        document.getElementById('fo-gps-coords').value = coords;
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check"></i> GPS';
+        btn.style.background = '#4caf50';
+        
+        showToast('✅ Lokatsiya qabul qilindi', 'success');
+        
+        setTimeout(function() {
+            btn.innerHTML = '<i class="fas fa-location-arrow"></i> GPS';
+            btn.style.background = '#667eea';
+        }, 2000);
+    }, function(error) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-location-arrow"></i> GPS';
+        
+        var msg = 'GPS xato';
+        if (error.code === error.PERMISSION_DENIED) msg = 'GPS ruxsati rad etildi';
+        else if (error.code === error.POSITION_UNAVAILABLE) msg = 'GPS mavjud emas';
+        else if (error.code === error.TIMEOUT) msg = 'GPS timeout';
+        
+        showToast('❌ ' + msg, 'error');
+    });
+}
+
 // =================== NEW ORDER FORM ===================
 function resetNewOrderForm() {
-    var ids = ['fo-name', 'fo-phone', 'fo-village', 'fo-comment'];
+    var ids = ['fo-name', 'fo-phone', 'fo-village', 'fo-comment', 'fo-gps-coords'];
     ids.forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.value = '';
@@ -521,7 +590,7 @@ function saveOrderFull() {
         customerName: name,
         phone:        fullPhone,
         location:     village,
-        gpsCoords:    '',
+        gpsCoords:    document.getElementById('fo-gps-coords').value || '',
         orderSource:  selectedSource,
         width:        firstItem ? firstItem.width  : 0,
         height:       firstItem ? firstItem.height : 0,
@@ -536,9 +605,9 @@ function saveOrderFull() {
         washingDate:  washDate || null,
         createdAt:    new Date().toISOString(),
         status:       'new',
-        paymentStatus: 'unpaid',
+        paymentStatus: 'paid',
         paymentMethod: null,
-        paidAt:        null,
+        paidAt:        new Date().toISOString(),
         queueNumber:   queueNum
     };
 
@@ -732,7 +801,7 @@ function openDetailsModal(order) {
 
     currentOrderId = Number(order.id);
     var showId = order.displayId || String(order.id).slice(-6);
-    var area = ((order.width||0)*(order.height||0)).toFixed(2);
+    var area = (parseFloat(order.totalArea)||0).toFixed(2);
     var sc = STATUS_CFG[order.status] || STATUS_CFG.new;
 
     var images = [];
@@ -824,6 +893,8 @@ function openDetailsModal(order) {
     navDiv.innerHTML =
         '<button class="det-nav-btn det-nav-call" onclick="window.location.href=\'tel:' + (order.phone||'') + '\'">' +
             '<i class="fas fa-phone"></i> Qo\'ng\'iroq</button>' +
+        (order.gpsCoords || order.location ? '<button class="det-nav-btn det-nav-map" onclick="openMapRoute(' + Number(order.id) + ')">' +
+            '<i class="fas fa-map-marked-alt"></i> Yo\'lni ochish</button>' : '') +
         '<button class="det-nav-btn det-nav-status" onclick="openStatusNavigator(' + Number(order.id) + ')">' +
             '<i class="fas fa-exchange-alt"></i> Holat</button>' +
         '<button class="det-nav-btn det-nav-delete" onclick="confirmDeleteOrder(' + Number(order.id) + ')">' +
@@ -836,6 +907,38 @@ function openDetailsModal(order) {
 function closeDetailsModal() {
     var modal = document.getElementById('detailsModal');
     if (modal) { modal.classList.remove('show'); document.body.style.overflow = ''; }
+}
+
+// =================== MAP NAVIGATION ===================
+function openMapRoute(orderId) {
+    var id = Number(orderId);
+    var order = orders.find(function(o) { return o.id === id; });
+    if (!order) return;
+    
+    var mapUrl = '';
+    var query = '';
+    
+    if (order.gpsCoords) {
+        query = order.gpsCoords;
+    } else if (order.location) {
+        query = encodeURIComponent(order.location + ' ' + (order.customerName || ''));
+    }
+    
+    if (!query) {
+        showToast('❌ Lokatsiya ma\'lumoti yo\'q', 'error');
+        return;
+    }
+    
+    // Try to detect if it's a coordinate or address
+    var isCoords = /^-?\d+\.?\d*,-?\d+\.?\d*$/.test(query);
+    
+    if (isCoords) {
+        mapUrl = 'https://www.google.com/maps?q=' + query;
+    } else {
+        mapUrl = 'https://www.google.com/maps?q=' + query;
+    }
+    
+    window.open(mapUrl, '_blank');
 }
 
 // =================== STATUS NAVIGATOR ===================
@@ -1012,6 +1115,44 @@ function adminLogin() {
         showToast('❌ Parol noto\'g\'ri!', 'error');
         pw.value = ''; pw.focus();
     }
+}
+
+// =================== SEARCH ===================
+function globalSearch(q){
+    var container = document.getElementById('recentOrders');
+    var header = document.querySelector('#homePage .section-header h2');
+    if(!container) return;
+
+    if(!q.trim()) {
+        if(header) header.textContent = 'Oxirgi zakazlar';
+        displayRecentOrders();
+        return;
+    }
+
+    var qLower = q.toLowerCase();
+    var qClean = q.replace(/\D/g,'');
+    var filtered = orders.filter(function(o){
+        var phoneClean = (o.phone||'').replace(/\D/g,'');
+        var phoneLast4 = phoneClean.slice(-4);
+        return phoneClean.includes(qClean) || 
+               phoneLast4 === qClean ||
+               phoneClean.endsWith(qClean) ||
+               (o.location||'').toLowerCase().includes(qLower) || 
+               String(o.displayId || o.id).includes(qLower) || 
+               (o.customerName||'').toLowerCase().includes(qLower);
+    });
+
+    if(header) header.textContent = 'Qidiruv natijalari (' + filtered.length + ')';
+    
+    if (filtered.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-search"></i><p>Hech narsa topilmadi</p></div>';
+        return;
+    }
+    
+    container.innerHTML = '';
+    filtered.slice(0, 20).forEach(function(order) {
+        container.appendChild(makeOrderCard(order));
+    });
 }
 
 // =================== TOAST ===================
