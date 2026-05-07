@@ -67,9 +67,24 @@
                     <div class="stat-label">Bugun</div>
                 </div>
                 <div class="stat-card">
-                    <i class="fas fa-ruler-combined" style="color:#4caf50"></i>
+                    <i class="fas fa-money-bill-wave" style="color:#4caf50"></i>
+                    <div class="stat-value" id="todayRevenueStat">0</div>
+                    <div class="stat-label">Tushum</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-ruler-combined" style="color:#9c27b0"></i>
                     <div class="stat-value" id="totalAreaStat">0</div>
                     <div class="stat-label">m²</div>
+                </div>
+            </div>
+
+            <!-- SEARCH BAR -->
+            <div class="search-section" style="padding:0 16px;margin-bottom:20px;">
+                <div class="search-wrapper" style="position:relative;">
+                    <i class="fas fa-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#888;"></i>
+                    <input type="text" id="homeSearchInput" placeholder="Tel yoki Ism orqali qidirish..." 
+                        style="width:100%;padding:12px 12px 12px 40px;border-radius:12px;border:1px solid #eee;font-size:15px;outline:none;background:var(--white);box-shadow:0 2px 8px rgba(0,0,0,0.05);"
+                        oninput="globalSearch(this.value)">
                 </div>
             </div>
 
@@ -133,7 +148,11 @@
                 <!-- Manzil -->
                 <div class="form-group">
                     <label><i class="fas fa-map-marker-alt"></i> Manzil / Qishloq</label>
-                    <input type="text" id="fo-village" placeholder="Do'stlik, Bog'cha...">
+                    <div style="display:flex;gap:8px;align-items:flex-end">
+                        <input type="text" id="fo-village" placeholder="Do'stlik, Bog'cha..." style="flex:1;">
+                        <button type="button" id="fo-gps-btn" onclick="captureGPSLocation()" style="padding:12px 16px;background:#667eea;color:#fff;border:none;border-radius:12px;cursor:pointer;font-size:14px;font-weight:600;white-space:nowrap;display:flex;align-items:center;gap:6px"><i class="fas fa-location-arrow"></i> GPS</button>
+                    </div>
+                    <input type="hidden" id="fo-gps-coords" value="">
                 </div>
 
                 <!-- Yuvish sanasi -->
