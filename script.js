@@ -35,31 +35,62 @@ var PRODUCT_PRICES = {
 
 // =================== INIT ===================
 document.addEventListener('DOMContentLoaded', function() {
+    // 1. Theme sync (already in index.html but good to ensure here too)
+    var savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
+    // 2. Load settings
     var savedPrice = localStorage.getItem('gilam_global_price');
     if (savedPrice && parseInt(savedPrice) >= 1000) {
         PRICE_PER_SQM = parseInt(savedPrice);
-        PRODUCT_PRICES.gilam.pricePerSqm = PRICE_PER_SQM;
+        if (PRODUCT_PRICES.gilam) PRODUCT_PRICES.gilam.pricePerSqm = PRICE_PER_SQM;
     }
-    loadProductPricesFromAdmin();
+    
+    try {
+        loadProductPricesFromAdmin();
+    } catch(e) { console.error("Price load error:", e); }
 
-    // Set today's date as default washing date
+    // 3. Set default date
     var washEl = document.getElementById('fo-washdate');
     if (washEl) washEl.value = todayStr();
 
+    // 4. Update UI labels
+    updateDateTime();
+    updateTodayLabel();
+
+    // 5. Loading Screen Fallback (Safety First)
+    var loadingTimeout = setTimeout(function() {
+        hideLoading();
+    }, 4000); // Max 4 seconds for loading
+
+    // 6. Initial Data Load
     loadOrdersFromDB(function() {
-        updateStats();
-        displayRecentOrders();
-        displayTodayPreview();
-        updateTodayBadge();
-        updateDateTime();
-        updateProfileStats();
-        setTimeout(function() {
-            var ls = document.getElementById('loadingScreen');
-            if (ls) ls.classList.add('hide');
-        }, 600);
+        clearTimeout(loadingTimeout);
+        updateAllUI();
+        hideLoading();
         startAutoRefresh();
     });
 });
+
+function hideLoading() {
+    var ls = document.getElementById('loadingScreen');
+    if (ls) {
+        ls.classList.add('hide');
+        // Butunlay o'chirish (DOM dan emas, lekin interactive bo'lmasligi uchun)
+        setTimeout(function() {
+            ls.style.display = 'none';
+            ls.style.pointerEvents = 'none';
+        }, 500);
+    }
+}
+
+function updateAllUI() {
+    updateStats();
+    displayRecentOrders();
+    displayTodayPreview();
+    updateTodayBadge();
+    updateProfileStats();
+}
 
 function startAutoRefresh() {
     setInterval(function() {
