@@ -687,27 +687,17 @@ tr:active td{background:rgba(102,126,234,.05)}
 <!-- MOBILE BOTTOM NAVIGATION -->
 <nav class="mobile-bottom-nav" id="mobileBottomNav">
   <div class="mbn-inner">
-    <button class="mbn-item active" id="mbn-dashboard" onclick="goPageMobile('dashboard',this)">
-      <i class="fas fa-th-large"></i>
-      <span>Dashboard</span>
+    <button class="mbn-item active" id="mbn-reports" onclick="goPageMobile('reports',this)">
+      <i class="fas fa-file-invoice"></i>
+      <span>Hisobotlar</span>
     </button>
-    <button class="mbn-item" id="mbn-orders" onclick="goPageMobile('orders',this)">
-      <i class="fas fa-shopping-bag"></i>
-      <span>Zakazlar</span>
-      <span class="mbn-badge" id="mbn-orders-badge" style="display:none">0</span>
-    </button>
-    <button class="mbn-item mbn-add" onclick="openAddOrder()">
-      <i class="fas fa-plus"></i>
-      <span>Yangi</span>
-    </button>
-    <button class="mbn-item" id="mbn-queue" onclick="goPageMobile('queue',this)">
-      <i class="fas fa-list-ol"></i>
-      <span>Navbat</span>
-      <span class="mbn-badge green" id="mbn-queue-badge" style="display:none">0</span>
+    <button class="mbn-item" id="mbn-pricing" onclick="goPageMobile('pricing',this)">
+      <i class="fas fa-tag"></i>
+      <span>Narxlar</span>
     </button>
     <button class="mbn-item" id="mbn-more" onclick="toggleMobileMenu()">
       <i class="fas fa-ellipsis-h"></i>
-      <span>Ko'proq</span>
+      <span>Boshqa</span>
     </button>
   </div>
 </nav>
@@ -718,17 +708,14 @@ tr:active td{background:rgba(102,126,234,.05)}
     <div class="logo-icon">🧺</div>
     <div>
       <div class="logo-text">Gilam Admin</div>
-      <div class="logo-sub">Boshqaruv paneli</div>
+      <div class="logo-sub">Nazorat paneli</div>
     </div>
   </div>
   <div class="sidebar-nav">
     <div class="nav-group-label">Asosiy</div>
-    <div class="sn-item active" id="sn-dashboard" onclick="goPage('dashboard',this)"><i class="fas fa-th-large"></i><span>Dashboard</span></div>
-    <div class="sn-item" id="sn-orders" onclick="goPage('orders',this)"><i class="fas fa-shopping-bag"></i><span>Barcha zakazlar</span><span class="sn-badge" id="sb-orders-badge">0</span></div>
-    <div class="sn-item" id="sn-queue" onclick="goPage('queue',this)"><i class="fas fa-list-ol"></i><span>Navbat</span><span class="sn-badge green" id="sb-queue-badge">0</span></div>
-    <div class="nav-group-label">Boshqaruv</div>
-    <div class="sn-item" id="sn-pricing" onclick="goPage('pricing',this)"><i class="fas fa-tag"></i><span>Narxlar</span></div>
-    <div class="sn-item" id="sn-stats" onclick="goPage('stats',this)"><i class="fas fa-chart-bar"></i><span>Statistika</span></div>
+    <div class="sn-item" id="sn-pricing" onclick="goPage('pricing',this)"><i class="fas fa-tag"></i><span>Narxlar sozlamasi</span></div>
+    <div class="sn-item" id="sn-reports" onclick="goPage('reports',this)"><i class="fas fa-file-invoice"></i><span>Hisobotlar</span></div>
+    <div class="nav-group-label">Boshqa</div>
     <div class="sn-item" id="sn-settings" onclick="goPage('settings',this)"><i class="fas fa-cog"></i><span>Sozlamalar</span></div>
   </div>
   <div class="sidebar-bottom">
@@ -752,7 +739,6 @@ tr:active td{background:rgba(102,126,234,.05)}
       <span class="th-sun">☀️</span>
       <span class="th-moon">🌙</span>
     </div>
-    <div class="tb-btn" onclick="openAddOrder()" title="Yangi zakaz"><i class="fas fa-plus" style="font-size:13px"></i></div>
     <div class="tb-btn" onclick="logout()" title="Chiqish"><i class="fas fa-sign-out-alt" style="font-size:13px"></i></div>
   </header>
 
@@ -779,16 +765,7 @@ tr:active td{background:rgba(102,126,234,.05)}
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px">
-        <div onclick="goPage('orders',document.getElementById('sn-orders'))" style="background:var(--white);border-radius:16px;padding:16px;box-shadow:var(--sh);cursor:pointer;transition:.2s;display:flex;align-items:center;gap:12px;border:1.5px solid transparent" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='transparent'">
-          <div style="width:42px;height:42px;border-radius:12px;background:rgba(102,126,234,.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🧾</div>
-          <div><div style="font-weight:700;font-size:13px">Zakazlar</div><div style="font-size:11px;color:var(--gray);margin-top:2px">Ko'rish →</div></div>
-        </div>
-        <div onclick="goPage('queue',document.getElementById('sn-queue'))" style="background:var(--white);border-radius:16px;padding:16px;box-shadow:var(--sh);cursor:pointer;transition:.2s;display:flex;align-items:center;gap:12px;border:1.5px solid transparent" onmouseover="this.style.borderColor='var(--orange)'" onmouseout="this.style.borderColor='transparent'">
-          <div style="width:42px;height:42px;border-radius:12px;background:rgba(249,115,22,.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📋</div>
-          <div><div style="font-weight:700;font-size:13px">Navbat</div><div style="font-size:11px;color:var(--gray);margin-top:2px">Ko'rish →</div></div>
-        </div>
-      </div>
+
     </div>
 
     <!-- ══════ ORDERS ══════ -->
@@ -865,8 +842,7 @@ tr:active td{background:rgba(102,126,234,.05)}
       </div>
     </div>
 
-    <!-- ══════ STATS ══════ -->
-    <div class="page" id="page-stats">
+    <div class="page" id="page-reports">
       <div class="stats-row">
         <div class="stat-card blue"><div class="sc-top"><div class="sc-icon blue"><i class="fas fa-shopping-bag"></i></div></div><div class="sc-val" id="st-total">0</div><div class="sc-lbl">Jami zakazlar</div></div>
         <div class="stat-card green"><div class="sc-top"><div class="sc-icon green"><i class="fas fa-coins"></i></div></div><div class="sc-val" id="st-paid-rev">0</div><div class="sc-lbl">To'langan daromad</div></div>
@@ -906,11 +882,6 @@ tr:active td{background:rgba(102,126,234,.05)}
             <div class="form-group" style="margin-bottom:10px"><label class="form-label">Yangi parol</label><input class="form-input" id="set-new-pass" type="password" placeholder="Yangi parol" autocomplete="new-password"></div>
             <div class="form-group" style="margin-bottom:12px"><label class="form-label">Yangi parolni tasdiqlang</label><input class="form-input" id="set-conf-pass" type="password" placeholder="Qayta kiriting" autocomplete="new-password"></div>
             <button onclick="changeAdminPassword()" class="act-btn primary" style="width:100%;padding:12px;font-size:13px;justify-content:center;border-radius:12px"><i class="fas fa-key"></i> Parolni saqlash</button>
-          </div>
-          <div style="background:var(--bg);border-radius:14px;padding:16px;border:1px solid var(--border)">
-            <div style="font-size:13px;font-weight:700;margin-bottom:4px;color:var(--red)">Ma'lumotlarni tozalash</div>
-            <div style="font-size:12px;color:var(--gray);margin-bottom:10px">Barcha zakazlar o'chib ketadi</div>
-            <button onclick="confirmClearAll()" class="act-btn red" style="width:100%;padding:12px;font-size:13px;justify-content:center;border-radius:12px"><i class="fas fa-trash"></i> Tozalash</button>
           </div>
           <a href="index.html" style="display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;padding:14px;border-radius:14px;font-weight:600;font-size:14px;text-decoration:none"><i class="fas fa-mobile-alt"></i> Mobil ilovaga qaytish</a>
           <button onclick="logout()" style="display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(239,68,68,.08);color:var(--red);padding:14px;border-radius:14px;font-weight:600;font-size:14px;border:1.5px solid rgba(239,68,68,.2);font-family:Inter,sans-serif;cursor:pointer;width:100%"><i class="fas fa-sign-out-alt"></i> Chiqish</button>
@@ -1214,6 +1185,8 @@ function rowToOrder(o){
     displayId:     o.display_id,
     phone:         o.phone,
     location:      o.location,
+    gpsCoords:     o.gps_coords || '',
+    orderSource:   o.order_source || '',
     width:         o.width,
     height:        o.height,
     price:         o.price,
@@ -1241,6 +1214,8 @@ function orderToRow(o){
     display_id:     o.displayId,
     phone:          o.phone,
     location:       o.location,
+    gps_coords:     o.gpsCoords || null,
+    order_source:   o.orderSource || null,
     width:          o.width,
     height:         o.height,
     price:          o.price,
@@ -1305,8 +1280,8 @@ function savePriceItems(){ localStorage.setItem('gilam_price_items', JSON.string
 // ══════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════
-var PAGE_TITLES = {dashboard:'Dashboard',orders:'Barcha zakazlar',queue:'Navbat',pricing:'Narxlar',stats:'Statistika',settings:'Sozlamalar'};
-var PAGE_ORDER = ['dashboard','orders','queue','pricing','stats','settings'];
+var PAGE_TITLES = {dashboard:'Dashboard',pricing:'Narxlar',reports:'Hisobotlar',settings:'Sozlamalar'};
+var PAGE_ORDER = ['dashboard','pricing','reports','settings'];
 var currentPage = 'dashboard';
 
 function goPage(name, el){
@@ -1335,10 +1310,8 @@ function goPage(name, el){
   window.scrollTo({top:0, behavior:'smooth'});
 
   if(name==='dashboard') renderDashboard();
-  else if(name==='orders') renderOrders();
-  else if(name==='queue') renderQueue();
   else if(name==='pricing'){ renderProductPricesGrid(); }
-  else if(name==='stats') renderStats();
+  else if(name==='reports') renderReports();
 }
 
 function goPageMobile(name, btn){
@@ -1384,24 +1357,15 @@ function closeSidebar(){
 // RENDER ALL
 // ══════════════════════════════════
 function renderAll(){
-  renderDashboard();
-  updateBadges();
+  if(currentPage==='dashboard') renderDashboard();
+  else if(currentPage==='orders') renderOrders();
+  else if(currentPage==='queue') renderQueue();
+  else if(currentPage==='pricing') renderPricing();
+  else if(currentPage==='reports') renderReports();
 }
 
 function updateBadges(){
-  var pending = orders.filter(function(o){ return o.status==='new'; }).length;
-  var qCount  = orders.filter(function(o){ return ['queue','washing','ready'].indexOf(o.status)>-1; }).length;
-  
-  var sb = document.getElementById('sb-orders-badge');
-  var qb = document.getElementById('sb-queue-badge');
-  if(sb) sb.textContent = pending;
-  if(qb) qb.textContent = qCount;
-
-  // Mobile badges
-  var mbnOB = document.getElementById('mbn-orders-badge');
-  var mbnQB = document.getElementById('mbn-queue-badge');
-  if(mbnOB){ mbnOB.textContent = pending; mbnOB.style.display = pending>0?'block':'none'; }
-  if(mbnQB){ mbnQB.textContent = qCount; mbnQB.style.display = qCount>0?'block':'none'; }
+  // Badgelar keraksiz bo'lgani uchun olib tashlandi
 }
 
 // ══════════════════════════════════
@@ -1420,7 +1384,10 @@ function fmtDateShort(iso){
   if(diff < 86400000) return Math.floor(diff/3600000) + ' soat';
   return d.toLocaleDateString('uz-UZ',{day:'2-digit',month:'2-digit'});
 }
-function todayStr(){ return new Date().toISOString().split('T')[0]; }
+function todayStr(){
+  var now = new Date();
+  return now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+}
 
 function statusBadge(status){
   var s = STATUS_CFG[status] || {label:status, emoji:'📦', cls:'b-new'};
@@ -1435,13 +1402,16 @@ function paymentBadge(ps){
 // ══════════════════════════════════
 function renderDashboard(){
   var today = todayStr();
-  var todayOrders = orders.filter(function(o){ return o.washingDate === today || (o.createdAt && o.createdAt.split('T')[0]===today); });
+  var todayOrders = orders.filter(function(o){
+    var createdDate = o.createdAt ? o.createdAt.split('T')[0] : '';
+    return o.washingDate === today || createdDate === today;
+  });
   var qOrders = orders.filter(function(o){ return ['queue','washing','ready'].indexOf(o.status)>-1; });
-  var todayArea = todayOrders.reduce(function(s,o){ return s+((o.width||0)*(o.height||0)); }, 0);
+  var todayArea = todayOrders.reduce(function(s,o){ return s+(parseFloat(o.totalArea)||0); }, 0);
   var todayPaidRev = todayOrders.filter(function(o){ return o.paymentStatus==='paid'; }).reduce(function(s,o){ return s+(o.price||0); },0);
 
   document.getElementById('dash-total').textContent = orders.length;
-  document.getElementById('dash-rev').textContent = (todayPaidRev/1000).toFixed(0)+'k';
+  document.getElementById('dash-rev').textContent = (todayPaidRev >= 1000000 ? (todayPaidRev/1000000).toFixed(1) + 'M' : (todayPaidRev/1000).toFixed(0) + 'k');
   document.getElementById('dash-queue').textContent = qOrders.length;
   document.getElementById('dash-area').textContent = todayArea.toFixed(1);
   document.getElementById('dash-today-chg').textContent = 'Bugun: +'+todayOrders.length;
@@ -1458,7 +1428,7 @@ function renderOrderCards(list, container, isQueue){
     return;
   }
   container.innerHTML = list.map(function(o, idx){
-    var area = ((o.width||0)*(o.height||0)).toFixed(1);
+    var area = (parseFloat(o.totalArea)||0).toFixed(1);
     var last4 = (o.phone||'').replace(/\D/g,'').slice(-4);
     var sc = STATUS_CFG[o.status] || {};
     return '<div class="order-card" onclick="openDetail('+o.id+')">'
@@ -1493,7 +1463,7 @@ function renderOrdersTable(list, container){
   }
   var html = '<table><thead><tr><th>ID</th><th>Telefon</th><th>Manzil</th><th>O\'lcham</th><th>Narx</th><th>Holat</th><th>To\'lov</th><th>Sana</th><th></th></tr></thead><tbody>';
   list.forEach(function(o){
-    var area = ((o.width||0)*(o.height||0)).toFixed(2);
+    var area = (parseFloat(o.totalArea)||0).toFixed(2);
     var last4 = (o.phone||'').replace(/\D/g,'').slice(-4);
     html += '<tr onclick="openDetail('+o.id+')" style="cursor:pointer">'
       + '<td class="td-id">#'+String(o.id).slice(-6)+'</td>'
@@ -1516,7 +1486,7 @@ function renderOrdersTable(list, container){
 // ══════════════════════════════════
 function renderOrders(){
   var filtered = getFilteredOrders();
-  var totalArea = filtered.reduce(function(s,o){ return s+((o.width||0)*(o.height||0)); },0);
+  var totalArea = filtered.reduce(function(s,o){ return s+(parseFloat(o.totalArea)||0); },0);
   var paid = filtered.filter(function(o){ return o.paymentStatus==='paid'; }).reduce(function(s,o){ return s+(o.price||0); },0);
   document.getElementById('o-total').textContent = filtered.length;
   document.getElementById('o-paid').textContent = (paid/1000).toFixed(0)+'k so\'m';
@@ -1569,7 +1539,7 @@ function renderQueueTable(list, container){
   var STATUS_COLORS = {queue:'var(--orange)',washing:'var(--blue)',ready:'var(--green)'};
   var html = '<table><thead><tr><th>#</th><th>Telefon</th><th>Manzil</th><th>O\'lcham</th><th>Narx</th><th>Holat</th><th>Vaqt</th><th></th></tr></thead><tbody>';
   list.forEach(function(o, idx){
-    var area = ((o.width||0)*(o.height||0)).toFixed(2);
+    var area = (parseFloat(o.totalArea)||0).toFixed(2);
     var color = STATUS_COLORS[o.status]||'var(--gray)';
     var last4 = (o.phone||'').replace(/\D/g,'').slice(-4);
     html += '<tr onclick="openDetail('+o.id+')" style="cursor:pointer">'
@@ -1616,9 +1586,10 @@ function openDetail(id){
 
   document.getElementById('dp-title').textContent = '#'+String(o.id).slice(-6)+' — Zakaz';
 
-  var STATUSES = ['new','washing','ready','done'];
-  var displayStatus = o.status === 'queue' ? 'new' : o.status;
-  var curIdx = STATUSES.indexOf(displayStatus);
+  var STATUSES = ['olib_ketildi','washing','done'];
+  var curIdx = STATUSES.indexOf(o.status === 'new' ? 'olib_ketildi' : (o.status === 'ready' ? 'done' : o.status));
+  if(curIdx < 0) curIdx = 0;
+
   var progressHtml = '<div class="status-progress">';
   STATUSES.forEach(function(s,i){
     var sc = STATUS_CFG[s];
@@ -1687,9 +1658,16 @@ function openDetail(id){
   var callBtn = makeBtn('dp-act primary','<i class="fas fa-phone"></i> Qo\'ng\'iroq',function(){ window.location.href='tel:'+o.phone; });
   acts.appendChild(callBtn);
 
-  if(o.status !== 'done'){
-    var NEXT = {new:'queue',queue:'washing',washing:'ready',ready:'done'};
-    var NEXT_LABELS = {new:'⏳ Navbat',queue:'🧼 Yuvish',washing:'✅ Tayyor',ready:'✔️ Topshir'};
+  if(o.gpsCoords){
+    var mapBtn = makeBtn('dp-act blue','<i class="fas fa-map-marker-alt"></i> Xaritada',function(){ 
+      window.open('https://www.google.com/maps?q='+o.gpsCoords, '_blank');
+    });
+    acts.appendChild(mapBtn);
+  }
+
+  if(o.status !== 'done' && o.status !== 'ready'){
+    var NEXT = {new:'washing',olib_ketildi:'washing',washing:'done'};
+    var NEXT_LABELS = {new:'🧼 Yuvish',olib_ketildi:'🧼 Yuvish',washing:'🚚 Yetkazish'};
     if(NEXT[o.status]){
       var nextBtn = makeBtn('dp-act green',NEXT_LABELS[o.status],function(){
         changeStatus(o.id, NEXT[o.status]);
@@ -1697,11 +1675,6 @@ function openDetail(id){
       acts.appendChild(nextBtn);
     }
   }
-
-  var payBtn = o.paymentStatus==='paid'
-    ? makeBtn('dp-act orange','❌ Bekor',function(){ togglePayment(o.id); })
-    : makeBtn('dp-act green','✅ To\'landi',function(){ togglePayment(o.id); });
-  acts.appendChild(payBtn);
 
   var editBtn = makeBtn('dp-act gray','<i class="fas fa-edit"></i>',function(){ openEditOrder(o.id); });
   acts.appendChild(editBtn);
@@ -2093,15 +2066,31 @@ function changeAdminPassword(){
 }
 
 // ══════════════════════════════════
-// STATS
+// REPORTS / STATISTICS
 // ══════════════════════════════════
-function renderStats(){
+function renderReports(){
   var today = todayStr();
-  var todayO = orders.filter(function(o){ return o.createdAt&&o.createdAt.split('T')[0]===today; });
-  var weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate()-7);
-  var weekO = orders.filter(function(o){ return new Date(o.createdAt)>=weekAgo; });
-  var monthAgo = new Date(); monthAgo.setMonth(monthAgo.getMonth()-1);
-  var monthO = orders.filter(function(o){ return new Date(o.createdAt)>=monthAgo; });
+  var now = new Date();
+  var weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7);
+  var monthAgo = new Date(); monthAgo.setMonth(monthAgo.getMonth() - 1);
+
+  // Filter orders for different periods
+  var todayO = orders.filter(function(o){
+    var createdDate = o.createdAt ? o.createdAt.split('T')[0] : '';
+    return createdDate === today || o.washingDate === today;
+  });
+  
+  var weekO = orders.filter(function(o){
+    if(!o.createdAt) return false;
+    var d = new Date(o.createdAt);
+    return d >= weekAgo;
+  });
+  
+  var monthO = orders.filter(function(o){
+    if(!o.createdAt) return false;
+    var d = new Date(o.createdAt);
+    return d >= monthAgo;
+  });
 
   // Compute per-product stats from productItems
   var prodStats = {
@@ -2115,12 +2104,20 @@ function renderStats(){
   orders.forEach(function(o){
     var items = [];
     try { items = JSON.parse(o.productItems || '[]'); } catch(e){}
+    
+    // If no productItems, treat as single item based on productType
+    if(items.length === 0){
+      var type = (o.productType || 'gilam').toLowerCase();
+      var key = Object.keys(prodStats).find(function(k){ return type.includes(k) || k.includes(type); }) || 'gilam';
+      items = [{ type: key, area: o.totalArea || (o.width*o.height), price: o.price }];
+    }
+
     items.forEach(function(it){
       var p = prodStats[it.type];
       if(!p) return;
       p.count++;
       p.revenue += (it.price || 0);
-      if(it.type === 'gilam' || it.type === 'yakandoz' && it.pricingType === 'sqm'){
+      if(it.type === 'gilam' || (it.type === 'yakandoz' && it.pricingType === 'sqm')){
         p.sqm = (p.sqm||0) + (it.area || (it.width||0)*(it.height||0));
       }
       if(it.type === 'yakandoz' && it.pricingType === 'meter'){
@@ -2132,12 +2129,12 @@ function renderStats(){
     });
   });
 
-  var totalArea  = orders.reduce(function(s,o){ return s+((o.width||0)*(o.height||0)); },0);
+  var totalArea  = orders.reduce(function(s,o){ return s+(parseFloat(o.totalArea)||0); },0);
   var paidRev    = orders.filter(function(o){ return o.paymentStatus==='paid'; }).reduce(function(s,o){ return s+(o.price||0); },0);
-  var pending    = orders.filter(function(o){ return o.status!=='done'; }).length;
+  var pending    = orders.filter(function(o){ return ['new','queue','washing','ready'].indexOf(o.status) > -1; }).length;
 
   document.getElementById('st-total').textContent = orders.length;
-  document.getElementById('st-paid-rev').textContent = (paidRev/1000).toFixed(0)+'k';
+  document.getElementById('st-paid-rev').textContent = (paidRev >= 1000000 ? (paidRev/1000000).toFixed(1) + 'M' : (paidRev/1000).toFixed(0) + 'k');
   document.getElementById('st-area').textContent = totalArea.toFixed(1)+' m²';
   document.getElementById('st-pending').textContent = pending;
 
@@ -2158,6 +2155,7 @@ function renderStats(){
   var todayRev = todayO.filter(function(o){ return o.paymentStatus==='paid'; }).reduce(function(s,o){ return s+(o.price||0); },0);
   var weekRev  = weekO.filter(function(o){ return o.paymentStatus==='paid'; }).reduce(function(s,o){ return s+(o.price||0); },0);
   var monthRev = monthO.filter(function(o){ return o.paymentStatus==='paid'; }).reduce(function(s,o){ return s+(o.price||0); },0);
+  
   document.getElementById('stat-period-list').innerHTML =
     '<div class="sdb-row"><span class="sdb-lbl">📅 Bugun</span><span class="sdb-val green">'+fmtMoney(todayRev)+'</span></div>'
     +'<div class="sdb-row"><span class="sdb-lbl">📅 Hafta</span><span class="sdb-val blue">'+fmtMoney(weekRev)+'</span></div>'
@@ -2168,7 +2166,7 @@ function renderStats(){
   if(prodEl){
     prodEl.innerHTML = Object.entries(prodStats).map(function(e){
       var k = e[0], p = e[1];
-      if(p.count === 0) return '<div class="sdb-row"><span class="sdb-lbl">'+p.emoji+' '+p.name+'</span><span class="sdb-val" style="color:var(--gray)">0 ta</span></div>';
+      if(p.count === 0) return '';
       var measStr = '';
       if(k === 'gilam')    measStr = (p.sqm||0).toFixed(1)+' m²';
       else if(k === 'yakandoz') measStr = (p.meters > 0 ? (p.meters).toFixed(1)+' m' : (p.sqm||0).toFixed(1)+' m²');
@@ -2183,6 +2181,7 @@ function renderStats(){
         +'<span style="color:'+c+'">'+fmtMoney(p.revenue)+'</span>'
         +'</span></div>';
     }).join('');
+    if(prodEl.innerHTML === '') prodEl.innerHTML = '<div class="empty-state">Ma\'lumot yo\'q</div>';
   }
 
   renderWeekBars();
