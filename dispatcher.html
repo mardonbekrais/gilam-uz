@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dispetcher | Gilam Zakaz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <p>Yuklanmoqda...</p>
+    </div>
+
+    <div class="main-content">
+        <!-- HOME PAGE -->
+        <div id="homePage" class="page active">
+            <div class="mobile-header">
+                <div class="welcome-section">
+                    <h1 id="welcomeTitle">Dispetcher</h1>
+                    <div class="date" id="currentDate">...</div>
+                </div>
+                <button class="admin-btn" onclick="window.location.href='index.html'">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <i class="fas fa-shopping-basket" style="color: var(--primary);"></i>
+                    <div class="stat-value" id="totalOrdersStat">0</div>
+                    <div class="stat-label">Jami</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-calendar-check" style="color: var(--success);"></i>
+                    <div class="stat-value" id="todayOrdersStat">0</div>
+                    <div class="stat-label">Bugun</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-money-bill-wave" style="color: var(--warning);"></i>
+                    <div class="stat-value" id="todayRevenueStat">0</div>
+                    <div class="stat-label">Summa</div>
+                </div>
+            </div>
+
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Ism, telefon yoki #ID orqali qidirish..." oninput="globalSearch(this.value)">
+            </div>
+
+            <div class="section-header">
+                <h2>Oxirgi zakazlar</h2>
+            </div>
+            <div id="recentOrders" class="orders-list">
+                <!-- Orders will be loaded here -->
+            </div>
+        </div>
+
+        <!-- NEW ORDER PAGE -->
+        <div id="neworderPage" class="page">
+            <h1 class="page-title">Yangi buyurtma</h1>
+            
+            <div class="form-group">
+                <label><i class="fas fa-user"></i> Ism Familiya</label>
+                <input type="text" id="fo-name" placeholder="Masalan: Alisher">
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-phone"></i> Telefon raqam</label>
+                <div class="phone-input-wrapper">
+                    <span class="phone-prefix">+998</span>
+                    <input type="tel" id="fo-phone" placeholder="90 123-45-67" oninput="formatPhoneInput(this)" onkeydown="handlePhoneKey(event, this)">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-map-marker-alt"></i> Manzil / Qishloq</label>
+                <input type="text" id="fo-village" placeholder="Qishloq nomi, ko'cha, uy">
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-comment"></i> Izoh (ixtiyoriy)</label>
+                <textarea id="fo-comment" rows="2" placeholder="Qo'shimcha ma'lumotlar..."></textarea>
+            </div>
+
+            <button class="btn-save" id="fo-saveBtn" onclick="saveDispatcherOrder()">
+                <i class="fas fa-check"></i> Buyurtmani saqlash
+            </button>
+        </div>
+
+        <!-- TODAY PAGE -->
+        <div id="todayPage" class="page">
+            <div class="queue-header">
+                <h1 class="page-title">Bugungi zakazlar</h1>
+                <div class="queue-total" id="todayTotal">0 ta</div>
+            </div>
+            
+            <div class="filter-chips">
+                <button class="chip active" onclick="setTodayFilter(this, 'all')">Hammasi</button>
+                <button class="chip" onclick="setTodayFilter(this, 'new')">Kutilmoqda</button>
+                <button class="chip" onclick="setTodayFilter(this, 'washing')">Yuvilmoqda</button>
+                <button class="chip" onclick="setTodayFilter(this, 'ready')">Tayyor</button>
+                <button class="chip" onclick="setTodayFilter(this, 'done')">Yetgazildi</button>
+            </div>
+
+            <div id="todayOrdersList" class="queue-list">
+                <!-- Today's orders will be loaded here -->
+            </div>
+        </div>
+
+        <!-- STATISTICS PAGE -->
+        <div id="statsPage" class="page">
+            <div class="mobile-header">
+                <h1>Statistika</h1>
+                <div class="date" id="statsDate">...</div>
+            </div>
+
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <i class="fas fa-shopping-basket" style="color: var(--primary);"></i>
+                    <div class="stat-value" id="stats-today-count">0</div>
+                    <div class="stat-label">Bugungi zakazlar</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-money-bill-wave" style="color: var(--success);"></i>
+                    <div class="stat-value" id="stats-today-revenue">0</div>
+                    <div class="stat-label">Summa</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-chart-pie" style="color: var(--warning);"></i>
+                    <div class="stat-value" id="stats-today-avg">0</div>
+                    <div class="stat-label">O'rtacha</div>
+                </div>
+            </div>
+
+            <div style="background:var(--white); padding:20px; border-radius:15px; margin-top:20px; box-shadow:var(--shadow);">
+                <h3 style="margin-bottom:15px;"><i class="fas fa-chart-column"></i> Holat bo'ylab</h3>
+                <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:15px;">
+                    <div style="text-align:center; padding:15px; background:var(--light-secondary); border-radius:12px;">
+                        <div style="font-size:20px; margin-bottom:5px;">⏳</div>
+                        <div style="font-size:12px; color:var(--gray); margin-bottom:8px;">Kutilmoqda</div>
+                        <div style="font-weight:700; font-size:18px; color:var(--warning);" id="stats-status-new">0</div>
+                    </div>
+                    <div style="text-align:center; padding:15px; background:var(--light-secondary); border-radius:12px;">
+                        <div style="font-size:20px; margin-bottom:5px;">🧼</div>
+                        <div style="font-size:12px; color:var(--gray); margin-bottom:8px;">Yuvilmoqda</div>
+                        <div style="font-weight:700; font-size:18px; color:var(--info);" id="stats-status-washing">0</div>
+                    </div>
+                    <div style="text-align:center; padding:15px; background:var(--light-secondary); border-radius:12px;">
+                        <div style="font-size:20px; margin-bottom:5px;">✅</div>
+                        <div style="font-size:12px; color:var(--gray); margin-bottom:8px;">Tayyor</div>
+                        <div style="font-weight:700; font-size:18px; color:var(--success);" id="stats-status-ready">0</div>
+                    </div>
+                    <div style="text-align:center; padding:15px; background:var(--light-secondary); border-radius:12px;">
+                        <div style="font-size:20px; margin-bottom:5px;">🚚</div>
+                        <div style="font-size:12px; color:var(--gray); margin-bottom:8px;">Yetgazildi</div>
+                        <div style="font-weight:700; font-size:18px; color:var(--primary);" id="stats-status-done">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" data-page="home" onclick="switchPage('home')">
+            <i class="fas fa-home"></i>
+            <span>Asosiy</span>
+        </button>
+        <button class="nav-item" data-page="today" onclick="switchPage('today')">
+            <i class="fas fa-calendar-day"></i>
+            <span>Bugun</span>
+            <div class="nav-badge" id="todayBadge">0</div>
+        </button>
+        <button class="nav-item add-btn" onclick="switchPage('neworder')">
+            <i class="fas fa-plus"></i>
+            <span class="add-btn-label">QO'SHISH</span>
+        </button>
+        <button class="nav-item" data-page="stats" onclick="switchPage('stats')">
+            <i class="fas fa-chart-pie"></i>
+            <span>Stat</span>
+        </button>
+        <button class="nav-item" onclick="window.location.href='index.html'">
+            <i class="fas fa-user"></i>
+            <span>Profil</span>
+        </button>
+    </nav>
+
+    <!-- DETAILS MODAL -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-info-circle"></i> Tafsilotlar</h2>
+                <button class="close-btn" onclick="closeDetailsModal()">✕</button>
+            </div>
+            <div class="modal-body" id="detailsContent"></div>
+            <div id="detailsNavigation"></div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="js/common.js"></script>
+    <script src="js/dispatcher.js"></script>
+</body>
+</html>
