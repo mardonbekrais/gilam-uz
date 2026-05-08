@@ -1,5 +1,6 @@
 // =================== ADMIN LOGIC ===================
 let orders = [];
+let productCatalog = [];
 let enteredPin = "";
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -62,44 +63,50 @@ function tryLogin() {
 }
 
 function loadAdminData() {
+    // 1. Orderlarni yuklash
     supabaseFetch('GET', 'orders?select=*&order=created_at.desc', null, function(err, data) {
         if (err) { showToast('❗ Xato: ' + err, 'error'); return; }
         orders = data.map(mapOrder);
         updateAdminUI();
-        
-        const savedPrice = localStorage.getItem('global_price') || 20000;
-        document.getElementById('global-price').value = savedPrice;
+    });
 
+    // 2. Global narxni yuklash
+    supabaseFetch('GET', 'settings?key=eq.global_price', null, function(err, data) {
+        if (!err && data && data.length > 0) {
+            document.getElementById('global-price').value = data[0].value;
+        }
+    });
+
+    // 3. Mahsulotlar katalogini yuklash
+    loadProductCatalog();
+}
+
+function loadProductCatalog() {
+    supabaseFetch('GET', 'products?select=*&order=created_at.asc', null, function(err, data) {
+        if (err) { showToast('❗ Katalog xatosi: ' + err, 'error'); return; }
+        productCatalog = data;
         renderProductCatalog();
     });
 }
 
 function renderProductCatalog() {
-    const catalog = JSON.parse(localStorage.getItem('product_catalog') || '[]');
     const body = document.getElementById('product-catalog-body');
     if (!body) return;
     body.innerHTML = '';
 
-    if (catalog.length === 0) {
-        // Default products if empty
-        const defaults = [
-            { emoji: '🧺', name: 'Gilam', price: 20000 },
-            { emoji: '🛏️', name: 'Adyol', price: 15000 },
-            { emoji: '🪟', name: 'Parda', price: 10000 }
-        ];
-        localStorage.setItem('product_catalog', JSON.stringify(defaults));
-        renderProductCatalog();
+    if (productCatalog.length === 0) {
+        body.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--gray);">Katalog bo\'sh</td></tr>';
         return;
     }
 
-    catalog.forEach((p, idx) => {
+    productCatalog.forEach((p) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td data-label="Emoji" style="font-size:24px;">${p.emoji}</td>
             <td data-label="Nomi"><strong>${p.name}</strong></td>
-            <td data-label="Narxi (1 m²)"><input type="number" value="${p.price}" onchange="updateCatalogPrice(${idx}, this.value)" style="width:100px; padding:5px; border-radius:8px; border:1px solid var(--border);"></td>
+            <td data-label="Narxi (1 m²)"><input type="number" value="${p.price}" onchange="updateCatalogPrice(${p.id}, this.value)" style="width:100px; padding:5px; border-radius:8px; border:1px solid var(--border);"></td>
             <td style="text-align:right;">
-                <button class="btn-action" style="color:var(--danger); background:var(--bg); margin-left:auto;" onclick="deleteFromCatalog(${idx})"><i class="fas fa-trash"></i></button>
+                <button class="btn-action" style="color:var(--danger); background:var(--bg); margin-left:auto;" onclick="deleteFromCatalog(${p.id})"><i class="fas fa-trash"></i></button>
             </td>
         `;
         body.appendChild(tr);
@@ -113,31 +120,34 @@ function addNewProductType() {
 
     if (!name) { showToast('❌ Mahsulot nomini kiriting', 'error'); return; }
 
-    const catalog = JSON.parse(localStorage.getItem('product_catalog') || '[]');
-    catalog.push({ emoji, name, price });
-    localStorage.setItem('product_catalog', JSON.stringify(catalog));
+    const newProduct = { emoji, name, price };
     
-    showToast('✅ Mahsulot katalogga qo\'shildi', 'success');
-    document.getElementById('new-p-emoji').value = '';
-    document.getElementById('new-p-name').value = '';
-    document.getElementById('new-p-price').value = '';
-    renderProductCatalog();
+    supabaseFetch('POST', 'products', newProduct, (err) => {
+        if (err) { showToast('❌ Xato: ' + err, 'error'); return; }
+        showToast('✅ Mahsulot katalogga qo\'shildi', 'success');
+        document.getElementById('new-p-emoji').value = '';
+        document.getElementById('new-p-name').value = '';
+        document.getElementById('new-p-price').value = '';
+        loadProductCatalog();
+    });
 }
 
-function updateCatalogPrice(idx, newPrice) {
-    const catalog = JSON.parse(localStorage.getItem('product_catalog') || '[]');
-    catalog[idx].price = parseFloat(newPrice) || 0;
-    localStorage.setItem('product_catalog', JSON.stringify(catalog));
-    showToast('✅ Narx yangilandi', 'success');
+function updateCatalogPrice(id, newPrice) {
+    const price = parseFloat(newPrice) || 0;
+    supabaseFetch('PATCH', `products?id=eq.${id}`, { price }, (err) => {
+        if (err) { showToast('❌ Xato: ' + err, 'error'); return; }
+        showToast('✅ Narx yangilandi', 'success');
+        loadProductCatalog();
+    });
 }
 
-function deleteFromCatalog(idx) {
+function deleteFromCatalog(id) {
     if (!confirm('Ushbu mahsulotni katalogdan o\'chirmoqchimisiz?')) return;
-    const catalog = JSON.parse(localStorage.getItem('product_catalog') || '[]');
-    catalog.splice(idx, 1);
-    localStorage.setItem('product_catalog', JSON.stringify(catalog));
-    renderProductCatalog();
-    showToast('🗑️ Katalogdan o\'chirildi', 'info');
+    supabaseFetch('DELETE', `products?id=eq.${id}`, null, (err) => {
+        if (err) { showToast('❌ Xato: ' + err, 'error'); return; }
+        showToast('🗑️ Katalogdan o\'chirildi', 'info');
+        loadProductCatalog();
+    });
 }
 
 function updateAdminUI() {
@@ -486,8 +496,10 @@ function toggleSidebar() {
 
 function savePrice() {
     const p = document.getElementById('global-price').value;
-    localStorage.setItem('global_price', p);
-    showToast('✅ Narx saqlandi: ' + p, 'success');
+    supabaseFetch('PATCH', 'settings?key=eq.global_price', { value: p }, (err) => {
+        if (err) { showToast('❌ Xato: ' + err, 'error'); return; }
+        showToast('✅ Narx saqlandi: ' + p, 'success');
+    });
 }
 
 function deleteOrder(id) {

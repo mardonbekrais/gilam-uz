@@ -1,16 +1,35 @@
 // =================== DELIVERY LOGIC ===================
 let orders = [];
+let productCatalog = [];
 let currentFilter = 'all';
 let currentOrder = null;
 let refinedProducts = [];
-let PRICE_PER_SQM = localStorage.getItem('global_price') || 20000;
+let PRICE_PER_SQM = 20000;
 
 document.addEventListener('DOMContentLoaded', function() {
-    PRICE_PER_SQM = localStorage.getItem('global_price') || 20000;
     updateDateTime();
-    loadOrders();
+    loadInitialData();
     startAutoRefresh();
 });
+
+function loadInitialData() {
+    // 1. Global narxni yuklash
+    supabaseFetch('GET', 'settings?key=eq.global_price', null, function(err, data) {
+        if (!err && data && data.length > 0) {
+            PRICE_PER_SQM = parseFloat(data[0].value) || 20000;
+        }
+    });
+
+    // 2. Mahsulotlar katalogini yuklash
+    supabaseFetch('GET', 'products?select=*&order=created_at.asc', null, function(err, data) {
+        if (!err && data) {
+            productCatalog = data;
+        }
+    });
+
+    // 3. Orderlarni yuklash
+    loadOrders();
+}
 
 function loadOrders() {
     supabaseFetch('GET', 'orders?select=*&order=created_at.desc', null, function(err, data) {
@@ -87,12 +106,11 @@ function startRefining(order) {
 }
 
 function openAddProduct() {
-    const catalog = JSON.parse(localStorage.getItem('product_catalog') || '[]');
     const container = document.getElementById('dynamic-product-buttons');
     if (!container) return;
     
     container.innerHTML = '';
-    catalog.forEach(p => {
+    productCatalog.forEach(p => {
         const btn = document.createElement('button');
         btn.className = 'action-btn';
         btn.innerHTML = `<span>${p.emoji} ${p.name}</span>`;

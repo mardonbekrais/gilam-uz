@@ -8,72 +8,222 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/base.css">
     <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+        
         body {
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: #f0f2f5;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(102, 126, 234, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(118, 75, 162, 0.15) 0px, transparent 50%);
+            min-height: 100vh;
+            overflow: hidden;
         }
+
+        /* Orqa fondagi animatsiya elementlari */
+        .bg-shapes {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .shape {
+            position: absolute;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            filter: blur(80px);
+            opacity: 0.1;
+            border-radius: 50%;
+            animation: move 20s infinite alternate;
+        }
+        .shape-1 { width: 400px; height: 400px; top: -100px; right: -100px; }
+        .shape-2 { width: 300px; height: 300px; bottom: -50px; left: -50px; animation-delay: -5s; }
+
+        @keyframes move {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 100px) scale(1.2); }
+        }
+
         .entry-container {
-            background: var(--white);
-            padding: 30px;
-            border-radius: 30px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 35px;
             width: 100%;
-            max-width: 400px;
+            max-width: 440px;
             text-align: center;
-            box-shadow: var(--shadow-lg);
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.05),
+                inset 0 0 0 1px var(--glass-border);
+            animation: fadeIn 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 25px;
         }
         .logo-icon {
-            font-size: 60px;
-            margin-bottom: 20px;
-            display: inline-block;
+            font-size: 70px;
+            filter: drop-shadow(0 10px 15px rgba(102, 126, 234, 0.3));
+            animation: float 4s ease-in-out infinite;
         }
-        h1 { margin-bottom: 10px; font-weight: 800; color: var(--dark); }
-        p { color: var(--gray); margin-bottom: 30px; }
+        .logo-ring {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120%; height: 120%;
+            border: 2px dashed var(--primary);
+            border-radius: 50%;
+            opacity: 0.2;
+            animation: rotate 15s linear infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes rotate {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        h1 { 
+            margin-bottom: 8px; 
+            font-size: 32px;
+            font-weight: 900; 
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+        p { 
+            color: var(--gray); 
+            margin-bottom: 35px; 
+            font-size: 15px; 
+            line-height: 1.5;
+            padding: 0 10px;
+        }
+
         .role-buttons {
             display: grid;
-            gap: 15px;
+            gap: 16px;
         }
         .role-btn {
             display: flex;
             align-items: center;
-            gap: 15px;
-            padding: 15px 20px;
-            border: 2px solid var(--border);
-            border-radius: 20px;
+            gap: 18px;
+            padding: 18px 24px;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 22px;
             text-decoration: none;
             color: var(--dark);
             font-weight: 700;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
         }
-        .role-btn i { font-size: 24px; color: var(--primary); width: 30px; }
+
+        .role-btn::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: opacity 0.4s;
+            z-index: 1;
+        }
+
         .role-btn:hover {
-            transform: translateY(-4px);
-            border-color: var(--primary);
-            box-shadow: var(--shadow-md);
+            transform: scale(1.02);
+            border-color: transparent;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+            color: white;
+        }
+        .role-btn:hover::after { opacity: 1; }
+
+        .role-btn i { 
+            font-size: 26px; 
+            color: var(--primary); 
+            width: 32px;
+            transition: all 0.4s;
+            z-index: 2;
+        }
+        .role-btn span { z-index: 2; font-size: 16px; }
+        .role-btn .arrow { 
+            margin-left: auto; 
+            font-size: 14px; 
+            opacity: 0.3; 
+            transition: all 0.4s;
+            z-index: 2;
+        }
+
+        .role-btn:hover i, .role-btn:hover .arrow { color: white; opacity: 1; }
+        .role-btn:hover .arrow { transform: translateX(5px); }
+
+        .footer-note {
+            margin-top: 30px;
+            font-size: 12px;
+            color: var(--gray-light);
+            font-weight: 500;
+        }
+
+        @media (max-width: 480px) {
+            .entry-container {
+                padding: 30px 20px;
+                border-radius: 30px;
+            }
+            h1 { font-size: 28px; }
+            .logo-icon { font-size: 60px; }
         }
     </style>
 </head>
 <body>
+    <div class="bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+    </div>
+
     <div class="entry-container">
-        <span class="logo-icon">🧺</span>
+        <div class="logo-wrapper">
+            <div class="logo-ring"></div>
+            <span class="logo-icon">🧺</span>
+        </div>
         <h1>Gilam Zakaz</h1>
-        <p>Loyiha boshqaruv tizimi. Davom etish uchun rolingizni tanlang:</p>
+        <p>Boshqaruv tizimiga xush kelibsiz. Ishni davom ettirish uchun tizimdagi rolingizni tanlang:</p>
         
         <div class="role-buttons">
             <a href="dispatcher.html" class="role-btn">
                 <i class="fas fa-headset"></i>
                 <span>Dispetcher</span>
+                <i class="fas fa-chevron-right arrow"></i>
             </a>
             <a href="delivery.html" class="role-btn">
                 <i class="fas fa-truck"></i>
                 <span>Dastavchik</span>
+                <i class="fas fa-chevron-right arrow"></i>
             </a>
             <a href="admin.html" class="role-btn">
                 <i class="fas fa-user-shield"></i>
                 <span>Admin Panel</span>
+                <i class="fas fa-chevron-right arrow"></i>
             </a>
+        </div>
+
+        <div class="footer-note">
+            © 2026 Gilam Zakaz • v2.0
         </div>
     </div>
 </body>
