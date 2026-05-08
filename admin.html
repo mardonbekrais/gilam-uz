@@ -909,12 +909,15 @@
                     </div>
 
                     <div class="filter-controls">
-                        <select id="filter-status" class="filter-select" onchange="applyAdminFilters()">
+                        <select id="filter-status" onchange="applyAdminFilters()">
                             <option value="all">Barcha holatlar</option>
-                            <option value="new">⏳ Kutilmoqda</option>
-                            <option value="washing">🧼 Yuvilmoqda</option>
-                            <option value="ready">✅ Tayyor</option>
-                            <option value="done">🚚 Yetkazildi</option>
+                            <option value="new">Kutilmoqda (Yangi)</option>
+                            <option value="active">Faollashtirildi</option>
+                            <option value="ready_to_wash">Yuvishga tayyor</option>
+                            <option value="washing">Yuvilmoqda</option>
+                            <option value="packing">Upakovka</option>
+                            <option value="ready">Tayyor (Dastavkaga)</option>
+                            <option value="done">Yetkazildi</option>
                         </select>
 
                         <select id="filter-sort" class="filter-select" onchange="applyAdminFilters()">
@@ -1004,13 +1007,59 @@
                         <input type="number" id="global-price" value="20000" style="margin-bottom:15px; padding:12px; width:100%; border-radius:10px; border:1px solid var(--border);">
                         <button class="btn-save" style="width:100%;" onclick="savePrice()">Asosiy narxni saqlash</button>
                     </div>
+                    
                     <div class="form-group" style="background:var(--white); padding:25px; border-radius:20px; box-shadow:var(--shadow);">
                         <h3 style="margin-bottom:15px; color:var(--secondary);"><i class="fas fa-plus-circle"></i> Yangi mahsulot qo'shish</h3>
-                        <div style="display:grid; gap:10px;">
-                            <input type="text" id="new-p-emoji" placeholder="Emoji (masalan: 🧺)" style="padding:10px; border-radius:10px; border:1px solid var(--border);">
-                            <input type="text" id="new-p-name" placeholder="Mahsulot nomi" style="padding:10px; border-radius:10px; border:1px solid var(--border);">
-                            <input type="number" id="new-p-price" placeholder="Narxi (1 m² uchun)" style="padding:10px; border-radius:10px; border:1px solid var(--border);">
-                            <button class="btn-save" style="background:var(--secondary); width:100%;" onclick="addNewProductType()">Katalogga qo'shish</button>
+                        <div style="display:grid; gap:12px;">
+                            <div style="display:grid; grid-template-columns: 80px 1fr; gap:10px;">
+                                <input type="text" id="new-p-emoji" placeholder="Emoji" style="padding:10px; border-radius:10px; border:1px solid var(--border); font-size: 20px; text-align: center;">
+                                <input type="text" id="new-p-name" placeholder="Mahsulot nomi" style="padding:10px; border-radius:10px; border:1px solid var(--border);">
+                            </div>
+                            
+                            <div style="padding:15px; background:var(--bg); border-radius:12px;">
+                                <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                                    <input type="checkbox" id="check-fixed" style="width:18px; height:18px;">
+                                    <label for="check-fixed" style="font-weight:700; cursor:pointer;">O'lchamli narxlar (S, M, L)</label>
+                                </div>
+                                <div id="fixed-prices-input" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; display:none;">
+                                    <div>
+                                        <small style="color:var(--gray);">S (Kichik)</small>
+                                        <input type="number" id="new-p-s" placeholder="Narx" style="padding:8px; width:100%; border-radius:8px; border:1px solid var(--border);">
+                                    </div>
+                                    <div>
+                                        <small style="color:var(--gray);">M (O'rtacha)</small>
+                                        <input type="number" id="new-p-m" placeholder="Narx" style="padding:8px; width:100%; border-radius:8px; border:1px solid var(--border);">
+                                    </div>
+                                    <div>
+                                        <small style="color:var(--gray);">L (Katta)</small>
+                                        <input type="number" id="new-p-l" placeholder="Narx" style="padding:8px; width:100%; border-radius:8px; border:1px solid var(--border);">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="padding:15px; background:var(--bg); border-radius:12px;">
+                                <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                                    <input type="checkbox" id="check-sqm" style="width:18px; height:18px;">
+                                    <label for="check-sqm" style="font-weight:700; cursor:pointer;">Kvadrat metr (m²) bo'yicha</label>
+                                </div>
+                                <div id="sqm-price-input" style="display:none;">
+                                    <small style="color:var(--gray);">1 m² narxi</small>
+                                    <input type="number" id="new-p-sqm" placeholder="Narx" style="padding:8px; width:100%; border-radius:8px; border:1px solid var(--border);">
+                                </div>
+                            </div>
+
+                            <div style="padding:15px; background:var(--bg); border-radius:12px;">
+                                <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                                    <input type="checkbox" id="check-kg" style="width:18px; height:18px;">
+                                    <label for="check-kg" style="font-weight:700; cursor:pointer;">Kilogramm (KG) bo'yicha</label>
+                                </div>
+                                <div id="kg-price-input" style="display:none;">
+                                    <small style="color:var(--gray);">1 kg narxi</small>
+                                    <input type="number" id="new-p-kg" placeholder="Narx" style="padding:8px; width:100%; border-radius:8px; border:1px solid var(--border);">
+                                </div>
+                            </div>
+
+                            <button class="btn-save" style="background:var(--secondary); width:100%; height: 50px;" onclick="addNewProductType()">Katalogga qo'shish</button>
                         </div>
                     </div>
                 </div>
@@ -1023,7 +1072,9 @@
                                 <tr>
                                     <th>Emoji</th>
                                     <th>Nomi</th>
-                                    <th>Narxi (1 m²)</th>
+                                    <th>O'lchamli (S / M / L)</th>
+                                    <th>Kv. Metr (1 m²)</th>
+                                    <th>KG (1 kg)</th>
                                     <th style="text-align:right;">Amal</th>
                                 </tr>
                             </thead>
@@ -1043,6 +1094,71 @@
             <div id="orderModalContent"></div>
         </div>
     </div>
+
+    <div id="productEditModal" class="modal-overlay">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeProductEditModal()">✕</button>
+            <h2 style="margin-bottom:20px;"><i class="fas fa-edit"></i> Mahsulotni tahrirlash</h2>
+            <div style="display:grid; gap:15px;">
+                <input type="hidden" id="edit-p-id">
+                <div style="display:grid; grid-template-columns: 80px 1fr; gap:10px;">
+                    <input type="text" id="edit-p-emoji" placeholder="Emoji" style="padding:12px; border-radius:12px; border:1px solid var(--border); font-size: 24px; text-align: center;">
+                    <input type="text" id="edit-p-name" placeholder="Mahsulot nomi" style="padding:12px; border-radius:12px; border:1px solid var(--border); font-weight:700;">
+                </div>
+                
+                <div style="padding:15px; background:var(--bg); border-radius:15px;">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+                        <input type="checkbox" id="edit-check-fixed" style="width:20px; height:20px;">
+                        <label for="edit-check-fixed" style="font-weight:700; cursor:pointer;">O'lchamli narxlar (S, M, L)</label>
+                    </div>
+                    <div id="edit-fixed-prices-input" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+                        <div>
+                            <small style="color:var(--gray);">S (Kichik)</small>
+                            <input type="number" id="edit-p-s" placeholder="Narx" style="padding:10px; width:100%; border-radius:10px; border:1px solid var(--border);">
+                        </div>
+                        <div>
+                            <small style="color:var(--gray);">M (O'rtacha)</small>
+                            <input type="number" id="edit-p-m" placeholder="Narx" style="padding:10px; width:100%; border-radius:10px; border:1px solid var(--border);">
+                        </div>
+                        <div>
+                            <small style="color:var(--gray);">L (Katta)</small>
+                            <input type="number" id="edit-p-l" placeholder="Narx" style="padding:10px; width:100%; border-radius:10px; border:1px solid var(--border);">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="padding:15px; background:var(--bg); border-radius:15px;">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+                        <input type="checkbox" id="edit-check-sqm" style="width:20px; height:20px;">
+                        <label for="edit-check-sqm" style="font-weight:700; cursor:pointer;">Kvadrat metr (m²) bo'yicha</label>
+                    </div>
+                    <div id="edit-sqm-price-input">
+                        <small style="color:var(--gray);">1 m² narxi</small>
+                        <input type="number" id="edit-p-sqm" placeholder="Narx" style="padding:10px; width:100%; border-radius:10px; border:1px solid var(--border);">
+                    </div>
+                </div>
+
+                <div style="padding:15px; background:var(--bg); border-radius:15px;">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+                        <input type="checkbox" id="edit-check-kg" style="width:20px; height:20px;">
+                        <label for="edit-check-kg" style="font-weight:700; cursor:pointer;">Kilogramm (KG) bo'yicha</label>
+                    </div>
+                    <div id="edit-kg-price-input" style="display:none;">
+                        <small style="color:var(--gray);">1 kg narxi</small>
+                        <input type="number" id="edit-p-kg" placeholder="Narx" style="padding:10px; width:100%; border-radius:10px; border:1px solid var(--border);">
+                    </div>
+                </div>
+
+                <button class="btn-save" style="width:100%; height: 55px; font-size: 16px;" onclick="saveProductUpdate()">O'zgarishlarni saqlash</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
+iv>
 
     <script src="js/common.js"></script>
     <script src="js/admin.js"></script>

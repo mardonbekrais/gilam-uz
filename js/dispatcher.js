@@ -173,7 +173,31 @@ function openDetailsModal(order) {
                 <div class="det-info-label">📅 Qabul qilingan vaqt</div>
                 <div class="det-info-val">${formatDateTime(order.createdAt)}</div>
             </div>
+            <div class="det-info-card">
+                <div class="det-info-label">💰 Summa</div>
+                <div class="det-info-val" style="color:var(--success); font-size:18px;">${formatMoney(order.price)}</div>
+            </div>
+            <div class="det-info-card">
+                <div class="det-info-label">📏 Jami hajm</div>
+                <div class="det-info-val">${order.totalArea}</div>
+            </div>
         </div>
+        ${order.productItems && Array.isArray(order.productItems) && order.productItems.length ? `
+            <div style="margin-top:20px; padding:15px; background:var(--light-secondary); border-radius:15px;">
+                <div style="font-weight:700; margin-bottom:10px; color:var(--primary);">📦 Mahsulotlar:</div>
+                ${order.productItems.map(group => `
+                    <div style="margin-bottom:10px; padding:10px; background:#fff; border-radius:10px;">
+                        <div style="font-weight:700; margin-bottom:5px;">${group.emoji || '📦'} ${group.name}</div>
+                        ${group.items.map(item => `
+                            <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--gray);">
+                                <span>${item.type}: ${item.type === 'sqm' ? item.area.toFixed(2) + ' m²' : item.count + ' ta'}</span>
+                                <span>${formatMoney(item.type === 'sqm' ? item.area * item.price : item.count * item.price)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `).join('')}
+            </div>
+        ` : ''}
         ${order.comment ? `<div style="margin-top:15px;padding:15px;background:#f8f9fa;border-radius:12px;font-size:14px;"><strong>Izoh:</strong> ${order.comment}</div>` : ''}
     `;
 

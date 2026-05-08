@@ -3,11 +3,13 @@ const SUPABASE_URL = 'https://qscvtxtgbwbshkrqklgk.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzY3Z0eHRnYndic2hrcnFrbGdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMzc3MDcsImV4cCI6MjA5MDgxMzcwN30.usjIv2xDGTcNOMV7rwZMEV7P7f8MmelDqHnDiO4WHAA';
 
 const STATUS_CFG = {
-    new:     { label: 'Kutilmoqda', emoji: '⏳', color: '#ff9800', bg: '#fff3e0' },
-    queue:   { label: 'Kutilmoqda', emoji: '⏳', color: '#ff9800', bg: '#fff3e0' },
-    washing: { label: 'Yuvilmoqda', emoji: '🧼', color: '#2196f3', bg: '#e3f2fd' },
-    ready:   { label: 'Tayyor',     emoji: '✅', color: '#4caf50', bg: '#e8f5e9' },
-    done:    { label: 'Yetkazildi', emoji: '🚚', color: '#9c27b0', bg: '#f3e5f5' }
+    new:           { label: 'Kutilmoqda',      emoji: '⏳', color: '#ff9800', bg: '#fff3e0' },
+    active:        { label: 'Faollashtirildi', emoji: '🚀', color: '#e91e63', bg: '#fce4ec' },
+    ready_to_wash: { label: 'Yuvishga tayyor', emoji: '🛁', color: '#3f51b5', bg: '#e8eaf6' },
+    washing:       { label: 'Yuvilmoqda',      emoji: '🧼', color: '#2196f3', bg: '#e3f2fd' },
+    packing:       { label: 'Upakovka',        emoji: '📦', color: '#795548', bg: '#efebe9' },
+    ready:         { label: 'Tayyor',          emoji: '✅', color: '#4caf50', bg: '#e8f5e9' },
+    done:          { label: 'Yetkazildi',      emoji: '🚚', color: '#9c27b0', bg: '#f3e5f5' }
 };
 
 function supabaseFetch(method, path, data, callback) {

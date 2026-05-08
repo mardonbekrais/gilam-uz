@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ishchilar | Gilam Zakaz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        .worker-nav {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .worker-btn {
+            height: 60px;
+            border-radius: 15px;
+            border: none;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+            color: white;
+        }
+        .worker-btn:active { transform: scale(0.98); }
+        .product-item-card {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <p>Yuklanmoqda...</p>
+    </div>
+
+    <div class="main-content">
+        <div id="homePage" class="page active">
+            <div class="mobile-header">
+                <div class="welcome-section">
+                    <h1>Ishchilar Bo'limi</h1>
+                    <div class="date" id="currentDate">...</div>
+                </div>
+                <button class="admin-btn" onclick="window.location.href='index.html'">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+
+            <div class="filter-chips">
+                <button class="chip active" onclick="setFilter(this, 'ready_to_wash')">Yuvishga tayyor</button>
+                <button class="chip" onclick="setFilter(this, 'washing')">Yuvilmoqda</button>
+                <button class="chip" onclick="setFilter(this, 'packing')">Upakovka</button>
+                <button class="chip" onclick="setFilter(this, 'ready')">Tayyor</button>
+            </div>
+
+            <div id="ordersList" class="orders-list"></div>
+        </div>
+    </div>
+
+    <!-- DETAILS MODAL -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-info-circle"></i> Buyurtma tafsilotlari</h2>
+                <button class="close-btn" onclick="closeDetailsModal()">✕</button>
+            </div>
+            <div class="modal-body" id="detailsContent"></div>
+            <div id="detailsNavigation" class="worker-nav"></div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="js/common.js"></script>
+    <script src="js/worker.js"></script>
+</body>
+</html>

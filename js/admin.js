@@ -9,6 +9,52 @@ document.addEventListener('DOMContentLoaded', function() {
         loadAdminData();
     }
     
+    // Checkbox event listeners for product form (ADD)
+    const checkFixed = document.getElementById('check-fixed');
+    const checkSqm = document.getElementById('check-sqm');
+    const checkKg = document.getElementById('check-kg');
+    
+    if (checkFixed) {
+        checkFixed.onchange = (e) => {
+            document.getElementById('fixed-prices-input').style.display = e.target.checked ? 'grid' : 'none';
+        };
+    }
+    
+    if (checkSqm) {
+        checkSqm.onchange = (e) => {
+            document.getElementById('sqm-price-input').style.display = e.target.checked ? 'block' : 'none';
+        };
+    }
+
+    if (checkKg) {
+        checkKg.onchange = (e) => {
+            document.getElementById('kg-price-input').style.display = e.target.checked ? 'block' : 'none';
+        };
+    }
+
+    // Checkbox event listeners for product form (EDIT)
+    const editCheckFixed = document.getElementById('edit-check-fixed');
+    const editCheckSqm = document.getElementById('edit-check-sqm');
+    const editCheckKg = document.getElementById('edit-check-kg');
+    
+    if (editCheckFixed) {
+        editCheckFixed.onchange = (e) => {
+            document.getElementById('edit-fixed-prices-input').style.display = e.target.checked ? 'grid' : 'none';
+        };
+    }
+    
+    if (editCheckSqm) {
+        editCheckSqm.onchange = (e) => {
+            document.getElementById('edit-sqm-price-input').style.display = e.target.checked ? 'block' : 'none';
+        };
+    }
+
+    if (editCheckKg) {
+        editCheckKg.onchange = (e) => {
+            document.getElementById('edit-kg-price-input').style.display = e.target.checked ? 'block' : 'none';
+        };
+    }
+
     // Klaviaturadan raqamlarni eshitish
     document.addEventListener('keydown', function(e) {
         if (document.getElementById('loginOverlay').style.display === 'none') return;
@@ -95,39 +141,159 @@ function renderProductCatalog() {
     body.innerHTML = '';
 
     if (productCatalog.length === 0) {
-        body.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--gray);">Katalog bo\'sh</td></tr>';
+        body.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--gray);">Katalog bo\'sh</td></tr>';
         return;
     }
 
     productCatalog.forEach((p) => {
         const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        tr.onclick = (e) => {
+            if (e.target.closest('button')) return;
+            openEditProductModal(p.id);
+        };
+        
+        let fixedInfo = p.has_fixed ? 
+            `<div style="font-size:12px; line-height: 1.4;">
+                <span style="color:var(--gray);">S:</span> ${formatMoney(p.price_s)}<br>
+                <span style="color:var(--gray);">M:</span> ${formatMoney(p.price_m)}<br>
+                <span style="color:var(--gray);">L:</span> ${formatMoney(p.price_l)}
+            </div>` : 
+            '<span style="color:var(--gray-light);">—</span>';
+            
+        let sqmInfo = p.has_sqm ? 
+            `<strong>${formatMoney(p.price_sqm)}</strong>` : 
+            '<span style="color:var(--gray-light);">—</span>';
+
+        let kgInfo = p.has_kg ? 
+            `<strong>${formatMoney(p.price_kg)}</strong>` : 
+            '<span style="color:var(--gray-light);">—</span>';
+
         tr.innerHTML = `
             <td data-label="Emoji" style="font-size:24px;">${p.emoji}</td>
             <td data-label="Nomi"><strong>${p.name}</strong></td>
-            <td data-label="Narxi (1 m²)"><input type="number" value="${p.price}" onchange="updateCatalogPrice(${p.id}, this.value)" style="width:100px; padding:5px; border-radius:8px; border:1px solid var(--border);"></td>
+            <td data-label="O'lchamli">${fixedInfo}</td>
+            <td data-label="Kv. Metr">${sqmInfo}</td>
+            <td data-label="KG">${kgInfo}</td>
             <td style="text-align:right;">
-                <button class="btn-action" style="color:var(--danger); background:var(--bg); margin-left:auto;" onclick="deleteFromCatalog(${p.id})"><i class="fas fa-trash"></i></button>
+                <div style="display:flex; gap:5px; justify-content:flex-end;">
+                    <button class="btn-action" style="color:var(--primary); background:var(--bg);" onclick="openEditProductModal(${p.id})"><i class="fas fa-edit"></i></button>
+                    <button class="btn-action" style="color:var(--danger); background:var(--bg);" onclick="deleteFromCatalog(${p.id})"><i class="fas fa-trash"></i></button>
+                </div>
             </td>
         `;
         body.appendChild(tr);
     });
 }
 
+function openEditProductModal(id) {
+    const p = productCatalog.find(item => item.id == id);
+    if (!p) return;
+
+    document.getElementById('edit-p-id').value = p.id;
+    document.getElementById('edit-p-emoji').value = p.emoji;
+    document.getElementById('edit-p-name').value = p.name;
+    
+    const checkFixed = document.getElementById('edit-check-fixed');
+    const checkSqm = document.getElementById('edit-check-sqm');
+    const checkKg = document.getElementById('edit-check-kg');
+    
+    checkFixed.checked = p.has_fixed;
+    checkSqm.checked = p.has_sqm;
+    checkKg.checked = p.has_kg;
+    
+    document.getElementById('edit-p-s').value = p.price_s || '';
+    document.getElementById('edit-p-m').value = p.price_m || '';
+    document.getElementById('edit-p-l').value = p.price_l || '';
+    document.getElementById('edit-p-sqm').value = p.price_sqm || '';
+    document.getElementById('edit-p-kg').value = p.price_kg || '';
+    
+    document.getElementById('edit-fixed-prices-input').style.display = p.has_fixed ? 'grid' : 'none';
+    document.getElementById('edit-sqm-price-input').style.display = p.has_sqm ? 'block' : 'none';
+    document.getElementById('edit-kg-price-input').style.display = p.has_kg ? 'block' : 'none';
+    
+    document.getElementById('productEditModal').classList.add('show');
+}
+
+function closeProductEditModal() {
+    document.getElementById('productEditModal').classList.remove('show');
+}
+
+function saveProductUpdate() {
+    const id = document.getElementById('edit-p-id').value;
+    const emoji = document.getElementById('edit-p-emoji').value.trim() || '📦';
+    const name = document.getElementById('edit-p-name').value.trim();
+    
+    const hasFixed = document.getElementById('edit-check-fixed').checked;
+    const hasSqm = document.getElementById('edit-check-sqm').checked;
+    const hasKg = document.getElementById('edit-check-kg').checked;
+
+    if (!name) { showToast('❌ Mahsulot nomini kiriting', 'error'); return; }
+    if (!hasFixed && !hasSqm && !hasKg) { showToast('❌ Kamida bitta hisoblash turini tanlang', 'error'); return; }
+
+    const updatedData = { 
+        emoji, 
+        name,
+        has_fixed: hasFixed,
+        has_sqm: hasSqm,
+        has_kg: hasKg,
+        price_s: hasFixed ? (parseFloat(document.getElementById('edit-p-s').value) || 0) : 0,
+        price_m: hasFixed ? (parseFloat(document.getElementById('edit-p-m').value) || 0) : 0,
+        price_l: hasFixed ? (parseFloat(document.getElementById('edit-p-l').value) || 0) : 0,
+        price_sqm: hasSqm ? (parseFloat(document.getElementById('edit-p-sqm').value) || 0) : 0,
+        price_kg: hasKg ? (parseFloat(document.getElementById('edit-p-kg').value) || 0) : 0
+    };
+    
+    supabaseFetch('PATCH', `products?id=eq.${id}`, updatedData, (err) => {
+        if (err) { showToast('❌ Xato: ' + err, 'error'); return; }
+        showToast('✅ Mahsulot yangilandi', 'success');
+        closeProductEditModal();
+        loadProductCatalog();
+    });
+}
+
 function addNewProductType() {
     const emoji = document.getElementById('new-p-emoji').value.trim() || '📦';
     const name = document.getElementById('new-p-name').value.trim();
-    const price = parseFloat(document.getElementById('new-p-price').value) || 0;
+    
+    const hasFixed = document.getElementById('check-fixed').checked;
+    const hasSqm = document.getElementById('check-sqm').checked;
+    const hasKg = document.getElementById('check-kg').checked;
 
     if (!name) { showToast('❌ Mahsulot nomini kiriting', 'error'); return; }
+    if (!hasFixed && !hasSqm && !hasKg) { showToast('❌ Kamida bitta hisoblash turini tanlang', 'error'); return; }
 
-    const newProduct = { emoji, name, price };
+    const newProduct = { 
+        emoji, 
+        name,
+        has_fixed: hasFixed,
+        has_sqm: hasSqm,
+        has_kg: hasKg,
+        price_s: hasFixed ? (parseFloat(document.getElementById('new-p-s').value) || 0) : 0,
+        price_m: hasFixed ? (parseFloat(document.getElementById('new-p-m').value) || 0) : 0,
+        price_l: hasFixed ? (parseFloat(document.getElementById('new-p-l').value) || 0) : 0,
+        price_sqm: hasSqm ? (parseFloat(document.getElementById('new-p-sqm').value) || 0) : 0,
+        price_kg: hasKg ? (parseFloat(document.getElementById('new-p-kg').value) || 0) : 0
+    };
     
     supabaseFetch('POST', 'products', newProduct, (err) => {
         if (err) { showToast('❌ Xato: ' + err, 'error'); return; }
         showToast('✅ Mahsulot katalogga qo\'shildi', 'success');
-        document.getElementById('new-p-emoji').value = '';
+        
+        // Formani tozalash
         document.getElementById('new-p-name').value = '';
-        document.getElementById('new-p-price').value = '';
+        document.getElementById('new-p-s').value = '';
+        document.getElementById('new-p-m').value = '';
+        document.getElementById('new-p-l').value = '';
+        document.getElementById('new-p-sqm').value = '';
+        document.getElementById('new-p-kg').value = '';
+        document.getElementById('check-fixed').checked = false;
+        document.getElementById('check-sqm').checked = false;
+        document.getElementById('check-kg').checked = false;
+        document.getElementById('fixed-prices-input').style.display = 'none';
+        document.getElementById('sqm-price-input').style.display = 'none';
+        document.getElementById('kg-price-input').style.display = 'none';
+        
         loadProductCatalog();
     });
 }
@@ -196,8 +362,8 @@ function updateAdminStats() {
 
     // Holat bo'ylab statistika
     const statusCounts = {
-        'new': orders.filter(o => o.status === 'new' || o.status === 'queue').length,
-        'washing': orders.filter(o => o.status === 'washing').length,
+        'new': orders.filter(o => ['new', 'active'].includes(o.status)).length,
+        'washing': orders.filter(o => ['ready_to_wash', 'washing', 'packing'].includes(o.status)).length,
         'ready': orders.filter(o => o.status === 'ready').length,
         'done': orders.filter(o => o.status === 'done').length
     };
@@ -221,15 +387,35 @@ function updateProductStats() {
 
     periodOrders.forEach(o => {
         if (o.productItems && Array.isArray(o.productItems)) {
-            o.productItems.forEach(p => {
-                const name = p.name || 'Noma\'lum';
+            o.productItems.forEach(group => {
+                const name = group.name || 'Noma\'lum';
                 if (!stats[name]) {
-                    stats[name] = { name, emoji: p.emoji || '📦', count: 0, area: 0 };
+                    stats[name] = { name, emoji: group.emoji || '📦', count: 0, area: 0 };
                 }
-                stats[name].count += (parseFloat(p.count) || 0);
-                stats[name].area += (parseFloat(p.area) || 0);
-                totalCount += (parseFloat(p.count) || 0);
-                totalArea += (parseFloat(p.area) || 0);
+                
+                // Backward compatibility: if group.items is missing, it's an old format item
+                const items = group.items || [{
+                    type: group.type || 'sqm',
+                    area: group.area || 0,
+                    count: group.count || 0,
+                    price: group.price || 0
+                }];
+                
+                items.forEach(item => {
+                    if (item.type === 'sqm') {
+                        stats[name].area += (parseFloat(item.area) || 0);
+                        stats[name].count += 1;
+                        totalArea += (parseFloat(item.area) || 0);
+                        totalCount += 1;
+                    } else {
+                        stats[name].count += (parseFloat(item.count) || 0);
+                        totalCount += (parseFloat(item.count) || 0);
+                        if (item.type === 'KG') {
+                            stats[name].area += (parseFloat(item.count) || 0);
+                            totalArea += (parseFloat(item.count) || 0);
+                        }
+                    }
+                });
             });
         }
     });
@@ -297,7 +483,7 @@ function applyAdminFilters() {
             (o.location && o.location.toLowerCase().includes(q));
         
         // Status filter
-        const matchesStatus = status === 'all' || o.status === status || (status === 'new' && o.status === 'queue');
+        const matchesStatus = status === 'all' || o.status === status;
         
         // Date filter
         let matchesDate = true;
@@ -414,13 +600,28 @@ function openOrderModal(id) {
 
             <div style="margin-bottom:20px;">
                 <h3 style="margin-bottom:10px; font-size:16px;"><i class="fas fa-boxes-stacked"></i> Mahsulotlar</h3>
-                <div style="background:var(--bg); border-radius:15px; padding:10px;">
-                    ${order.productItems && order.productItems.length ? order.productItems.map(p => `
-                        <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #ddd;">
-                            <span>${p.emoji || '📦'} ${p.name} (${p.count} ta)</span>
-                            <strong>${p.area} m²</strong>
-                        </div>
-                    `).join('') : '<div style="padding:10px; color:var(--gray);">Mahsulotlar qo\'shilmagan</div>'}
+                <div style="background:var(--bg); border-radius:15px; padding:5px;">
+                    ${order.productItems && order.productItems.length ? order.productItems.map(group => {
+                        // Backward compatibility: if group.items is missing, it's an old format item
+                        const items = group.items || [{
+                            type: group.type || 'sqm',
+                            area: group.area || 0,
+                            count: group.count || 0,
+                            price: group.price || 0
+                        }];
+                        
+                        return `
+                            <div style="margin-bottom:10px; padding:10px; background:#fff; border-radius:10px; border:1px solid #eee;">
+                                <div style="font-weight:700; margin-bottom:5px; border-bottom:1px solid #f0f0f0; padding-bottom:5px;">${group.emoji || '📦'} ${group.name}</div>
+                                ${items.map(item => `
+                                    <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--gray); margin-bottom:3px;">
+                                        <span>${item.type}: ${item.type === 'sqm' ? (item.area || 0).toFixed(2) + ' m²' : (item.count || 0) + ' ta'}</span>
+                                        <strong style="color:var(--dark);">${formatMoney(item.type === 'sqm' ? (item.area || 0) * (item.price || 0) : (item.count || 0) * (item.price || 0))}</strong>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                    }).join('') : '<div style="padding:10px; color:var(--gray);">Mahsulotlar qo\'shilmagan</div>'}
                 </div>
             </div>
 
