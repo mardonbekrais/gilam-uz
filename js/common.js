@@ -51,6 +51,48 @@ function formatMoney(n) {
     return Number(n).toLocaleString() + " so'm";
 }
 
+function translateType(type) {
+    const types = {
+        'S': 'Kichik',
+        'M': 'O\'rtacha',
+        'L': 'Katta',
+        'kg': 'kg',
+        'KG': 'kg',
+        'sqm': 'm²',
+        'meter': 'm'
+    };
+    return types[type] || type;
+}
+
+function getOrderSummaryHtml(productItems) {
+    if (!productItems || !Array.isArray(productItems) || productItems.length === 0) return '';
+    
+    let html = '<div class="order-items-summary">';
+    productItems.forEach(group => {
+        let totalCount = 0;
+        let totalArea = 0;
+        let hasSqm = false, hasKg = false, hasMeter = false;
+        
+        if (group.items) {
+            group.items.forEach(item => {
+                totalCount += (item.count || 0);
+                if (item.type === 'sqm') { totalArea += (item.area || 0); hasSqm = true; }
+                else if (item.type === 'KG') { totalArea += (item.area || item.count || 0); hasKg = true; }
+                else if (item.type === 'meter') { totalArea += (item.value || 0); hasMeter = true; }
+            });
+        }
+
+        let label = `${totalCount} ta ${group.name}`;
+        if (hasSqm) label += ` (${totalArea.toFixed(1)} m²)`;
+        else if (hasKg) label += ` (${totalArea.toFixed(1)} kg)`;
+        else if (hasMeter) label += ` (${totalArea.toFixed(1)} m)`;
+        
+        html += `<span class="summary-item">${label}</span>`;
+    });
+    html += '</div>';
+    return html;
+}
+
 function formatDateTime(isoString) {
     if (!isoString) return '—';
     const date = new Date(isoString);

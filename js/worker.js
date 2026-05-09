@@ -36,8 +36,17 @@ function displayOrders() {
                     ${sc.emoji} ${sc.label}
                 </span>
             </div>
-            <div style="font-weight:700; font-size:16px; margin-bottom:5px;">👤 ${order.customerName || 'Noma\'lum'}</div>
-            <div style="font-size:13px; color:var(--gray);"><i class="far fa-clock"></i> ${formatDateTime(order.createdAt)}</div>
+            <div class="order-phone">
+                <i class="fas fa-user-circle" style="color:var(--primary); font-size:20px;"></i>
+                <span>${order.customerName || 'Noma\'lum'}</span>
+            </div>
+            
+            ${getOrderSummaryHtml(order.productItems)}
+
+            <div class="order-details">
+                <span><i class="far fa-clock"></i> ${formatDateTime(order.createdAt)}</span>
+                <span style="font-weight:800; color:var(--primary);">${order.totalArea} m²/kg</span>
+            </div>
         `;
         div.onclick = () => openOrderDetails(order);
         container.appendChild(div);
@@ -55,18 +64,12 @@ function openOrderDetails(order) {
     let itemsHtml = '';
     if (Array.isArray(order.productItems)) {
         order.productItems.forEach(group => {
-            const items = group.items || [{
-                type: group.type || 'sqm',
-                area: group.area || 0,
-                count: group.count || 0
-            }];
-
             itemsHtml += `
-                <div class="product-item-card">
-                    <div style="font-weight:700; margin-bottom:5px; font-size:15px;">${group.emoji || '📦'} ${group.name}</div>
-                    ${items.map(item => `
-                        <div style="font-size:14px; color:var(--dark);">
-                            • ${item.type}: ${item.type === 'sqm' ? (item.area || 0).toFixed(2) + ' m²' : (item.count || 0) + ' ta'}
+                <div class="product-item-card" style="background:var(--white); border:1px solid var(--border); border-radius:15px; padding:12px; margin-bottom:10px; box-shadow:var(--shadow);">
+                    <div style="font-weight:800; margin-bottom:8px; font-size:16px; color:var(--primary);">${group.emoji || '📦'} ${group.name}</div>
+                    ${group.items.map(item => `
+                        <div style="font-size:15px; color:var(--dark); display:flex; justify-content:space-between;">
+                            <span>• ${translateType(item.type)}: ${item.count || 1} ta ${item.type === 'sqm' ? '(' + (item.area || 0).toFixed(2) + ' m²)' : (item.type === 'KG' ? '(' + (item.area || 0).toFixed(1) + ' kg)' : (item.type === 'meter' ? '(' + (item.value || 0).toFixed(1) + ' m)' : ''))}</span>
                         </div>
                     `).join('')}
                 </div>
@@ -75,17 +78,20 @@ function openOrderDetails(order) {
     }
 
     content.innerHTML = `
-        <div style="background:${sc.bg}; color:${sc.color}; padding:15px; border-radius:15px; margin-bottom:15px; text-align:center;">
-            <div style="font-size:20px; font-weight:800;">#${order.displayId} - ${sc.label}</div>
-            <div style="font-weight:600;">Mijoz: ${order.customerName}</div>
+        <div style="background:${sc.bg}; color:${sc.color}; padding:20px; border-radius:20px; margin-bottom:20px; text-align:center; border:1px solid ${sc.color}30;">
+            <div style="font-size:24px; font-weight:900;">#${order.displayId}</div>
+            <div style="font-size:16px; font-weight:700; margin-top:5px;">${sc.emoji} ${sc.label}</div>
+            <div style="font-weight:600; margin-top:5px; color:var(--dark-secondary);">Mijoz: ${order.customerName}</div>
         </div>
-        <div style="margin-bottom:15px;">
-            <div style="font-weight:700; margin-bottom:10px; color:var(--primary); font-size:16px;">📦 Mahsulotlar:</div>
-            ${itemsHtml || '<div style="color:var(--gray);">Ro\'yxat bo\'sh</div>'}
+        <div style="margin-bottom:20px;">
+            <div style="font-weight:800; margin-bottom:12px; color:var(--primary); font-size:16px; display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-box-open"></i> Mahsulotlar:
+            </div>
+            ${itemsHtml || '<div style="color:var(--gray); text-align:center; padding:10px;">Ro\'yxat bo\'sh</div>'}
         </div>
         ${order.comment ? `
-            <div style="padding:12px; background:#fff9c4; border-radius:12px; font-size:14px; margin-bottom:15px;">
-                <div style="font-weight:700; color:#f57f17; margin-bottom:4px;">📝 Izoh:</div>
+            <div style="padding:15px; background:var(--light-secondary); border-radius:15px; font-size:14px; margin-bottom:20px; border-left:4px solid var(--warning);">
+                <div style="font-weight:800; color:var(--dark); margin-bottom:4px;">📝 Izoh:</div>
                 ${order.comment}
             </div>
         ` : ''}

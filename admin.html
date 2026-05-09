@@ -909,7 +909,7 @@
                     </div>
 
                     <div class="filter-controls">
-                        <select id="filter-status" onchange="applyAdminFilters()">
+                        <select id="filter-status" class="filter-select" onchange="applyAdminFilters()">
                             <option value="all">Barcha holatlar</option>
                             <option value="new">Kutilmoqda (Yangi)</option>
                             <option value="active">Faollashtirildi</option>
@@ -1023,15 +1023,15 @@
                                 </div>
                                 <div id="fixed-prices-input" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; display:none;">
                                     <div>
-                                        <small style="color:var(--gray);">S (Kichik)</small>
+                                        <small style="color:var(--gray);">Kichik</small>
                                         <input type="number" id="new-p-s" placeholder="Narx" style="padding:8px; width:100%; border-radius:8px; border:1px solid var(--border);">
                                     </div>
                                     <div>
-                                        <small style="color:var(--gray);">M (O'rtacha)</small>
+                                        <small style="color:var(--gray);">O'rtacha</small>
                                         <input type="number" id="new-p-m" placeholder="Narx" style="padding:8px; width:100%; border-radius:8px; border:1px solid var(--border);">
                                     </div>
                                     <div>
-                                        <small style="color:var(--gray);">L (Katta)</small>
+                                        <small style="color:var(--gray);">Katta</small>
                                         <input type="number" id="new-p-l" placeholder="Narx" style="padding:8px; width:100%; border-radius:8px; border:1px solid var(--border);">
                                     </div>
                                 </div>
@@ -1059,6 +1059,17 @@
                                 </div>
                             </div>
 
+                            <div style="padding:15px; background:var(--bg); border-radius:12px;">
+                                <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                                    <input type="checkbox" id="check-meter" style="width:18px; height:18px;">
+                                    <label for="check-meter" style="font-weight:700; cursor:pointer;">Metr (m) bo'yicha</label>
+                                </div>
+                                <div id="meter-price-input" style="display:none;">
+                                    <small style="color:var(--gray);">1 m narxi</small>
+                                    <input type="number" id="new-p-meter" placeholder="Narx" style="padding:8px; width:100%; border-radius:8px; border:1px solid var(--border);">
+                                </div>
+                            </div>
+
                             <button class="btn-save" style="background:var(--secondary); width:100%; height: 50px;" onclick="addNewProductType()">Katalogga qo'shish</button>
                         </div>
                     </div>
@@ -1072,9 +1083,10 @@
                                 <tr>
                                     <th>Emoji</th>
                                     <th>Nomi</th>
-                                    <th>O'lchamli (S / M / L)</th>
+                                    <th>O'lchamli (Kichik / O'rtacha / Katta)</th>
                                     <th>Kv. Metr (1 m²)</th>
                                     <th>KG (1 kg)</th>
+                                    <th>Metr (1 m)</th>
                                     <th style="text-align:right;">Amal</th>
                                 </tr>
                             </thead>
@@ -1113,15 +1125,15 @@
                     </div>
                     <div id="edit-fixed-prices-input" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
                         <div>
-                            <small style="color:var(--gray);">S (Kichik)</small>
+                            <small style="color:var(--gray);">Kichik</small>
                             <input type="number" id="edit-p-s" placeholder="Narx" style="padding:10px; width:100%; border-radius:10px; border:1px solid var(--border);">
                         </div>
                         <div>
-                            <small style="color:var(--gray);">M (O'rtacha)</small>
+                            <small style="color:var(--gray);">O'rtacha</small>
                             <input type="number" id="edit-p-m" placeholder="Narx" style="padding:10px; width:100%; border-radius:10px; border:1px solid var(--border);">
                         </div>
                         <div>
-                            <small style="color:var(--gray);">L (Katta)</small>
+                            <small style="color:var(--gray);">Katta</small>
                             <input type="number" id="edit-p-l" placeholder="Narx" style="padding:10px; width:100%; border-radius:10px; border:1px solid var(--border);">
                         </div>
                     </div>
@@ -1149,16 +1161,21 @@
                     </div>
                 </div>
 
+                <div style="padding:15px; background:var(--bg); border-radius:15px;">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+                        <input type="checkbox" id="edit-check-meter" style="width:20px; height:20px;">
+                        <label for="edit-check-meter" style="font-weight:700; cursor:pointer;">Metr (m) bo'yicha</label>
+                    </div>
+                    <div id="edit-meter-price-input" style="display:none;">
+                        <small style="color:var(--gray);">1 m narxi</small>
+                        <input type="number" id="edit-p-meter" placeholder="Narx" style="padding:10px; width:100%; border-radius:10px; border:1px solid var(--border);">
+                    </div>
+                </div>
+
                 <button class="btn-save" style="width:100%; height: 55px; font-size: 16px;" onclick="saveProductUpdate()">O'zgarishlarni saqlash</button>
             </div>
         </div>
     </div>
-
-    <script src="js/common.js"></script>
-    <script src="js/admin.js"></script>
-</body>
-</html>
-iv>
 
     <script src="js/common.js"></script>
     <script src="js/admin.js"></script>

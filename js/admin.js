@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const checkFixed = document.getElementById('check-fixed');
     const checkSqm = document.getElementById('check-sqm');
     const checkKg = document.getElementById('check-kg');
+    const checkMeter = document.getElementById('check-meter');
     
     if (checkFixed) {
         checkFixed.onchange = (e) => {
@@ -32,10 +33,17 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 
+    if (checkMeter) {
+        checkMeter.onchange = (e) => {
+            document.getElementById('meter-price-input').style.display = e.target.checked ? 'block' : 'none';
+        };
+    }
+
     // Checkbox event listeners for product form (EDIT)
     const editCheckFixed = document.getElementById('edit-check-fixed');
     const editCheckSqm = document.getElementById('edit-check-sqm');
     const editCheckKg = document.getElementById('edit-check-kg');
+    const editCheckMeter = document.getElementById('edit-check-meter');
     
     if (editCheckFixed) {
         editCheckFixed.onchange = (e) => {
@@ -52,6 +60,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (editCheckKg) {
         editCheckKg.onchange = (e) => {
             document.getElementById('edit-kg-price-input').style.display = e.target.checked ? 'block' : 'none';
+        };
+    }
+
+    if (editCheckMeter) {
+        editCheckMeter.onchange = (e) => {
+            document.getElementById('edit-meter-price-input').style.display = e.target.checked ? 'block' : 'none';
         };
     }
 
@@ -155,9 +169,9 @@ function renderProductCatalog() {
         
         let fixedInfo = p.has_fixed ? 
             `<div style="font-size:12px; line-height: 1.4;">
-                <span style="color:var(--gray);">S:</span> ${formatMoney(p.price_s)}<br>
-                <span style="color:var(--gray);">M:</span> ${formatMoney(p.price_m)}<br>
-                <span style="color:var(--gray);">L:</span> ${formatMoney(p.price_l)}
+                <span style="color:var(--gray);">${translateType('S')}:</span> ${formatMoney(p.price_s)}<br>
+                <span style="color:var(--gray);">${translateType('M')}:</span> ${formatMoney(p.price_m)}<br>
+                <span style="color:var(--gray);">${translateType('L')}:</span> ${formatMoney(p.price_l)}
             </div>` : 
             '<span style="color:var(--gray-light);">—</span>';
             
@@ -169,12 +183,17 @@ function renderProductCatalog() {
             `<strong>${formatMoney(p.price_kg)}</strong>` : 
             '<span style="color:var(--gray-light);">—</span>';
 
+        let meterInfo = p.has_meter ? 
+            `<strong>${formatMoney(p.price_meter)}</strong>` : 
+            '<span style="color:var(--gray-light);">—</span>';
+
         tr.innerHTML = `
             <td data-label="Emoji" style="font-size:24px;">${p.emoji}</td>
             <td data-label="Nomi"><strong>${p.name}</strong></td>
             <td data-label="O'lchamli">${fixedInfo}</td>
             <td data-label="Kv. Metr">${sqmInfo}</td>
             <td data-label="KG">${kgInfo}</td>
+            <td data-label="Metr">${meterInfo}</td>
             <td style="text-align:right;">
                 <div style="display:flex; gap:5px; justify-content:flex-end;">
                     <button class="btn-action" style="color:var(--primary); background:var(--bg);" onclick="openEditProductModal(${p.id})"><i class="fas fa-edit"></i></button>
@@ -197,20 +216,24 @@ function openEditProductModal(id) {
     const checkFixed = document.getElementById('edit-check-fixed');
     const checkSqm = document.getElementById('edit-check-sqm');
     const checkKg = document.getElementById('edit-check-kg');
+    const checkMeter = document.getElementById('edit-check-meter');
     
     checkFixed.checked = p.has_fixed;
     checkSqm.checked = p.has_sqm;
     checkKg.checked = p.has_kg;
+    checkMeter.checked = p.has_meter || false;
     
     document.getElementById('edit-p-s').value = p.price_s || '';
     document.getElementById('edit-p-m').value = p.price_m || '';
     document.getElementById('edit-p-l').value = p.price_l || '';
     document.getElementById('edit-p-sqm').value = p.price_sqm || '';
     document.getElementById('edit-p-kg').value = p.price_kg || '';
+    document.getElementById('edit-p-meter').value = p.price_meter || '';
     
     document.getElementById('edit-fixed-prices-input').style.display = p.has_fixed ? 'grid' : 'none';
     document.getElementById('edit-sqm-price-input').style.display = p.has_sqm ? 'block' : 'none';
     document.getElementById('edit-kg-price-input').style.display = p.has_kg ? 'block' : 'none';
+    document.getElementById('edit-meter-price-input').style.display = p.has_meter ? 'block' : 'none';
     
     document.getElementById('productEditModal').classList.add('show');
 }
@@ -227,9 +250,10 @@ function saveProductUpdate() {
     const hasFixed = document.getElementById('edit-check-fixed').checked;
     const hasSqm = document.getElementById('edit-check-sqm').checked;
     const hasKg = document.getElementById('edit-check-kg').checked;
+    const hasMeter = document.getElementById('edit-check-meter').checked;
 
     if (!name) { showToast('❌ Mahsulot nomini kiriting', 'error'); return; }
-    if (!hasFixed && !hasSqm && !hasKg) { showToast('❌ Kamida bitta hisoblash turini tanlang', 'error'); return; }
+    if (!hasFixed && !hasSqm && !hasKg && !hasMeter) { showToast('❌ Kamida bitta hisoblash turini tanlang', 'error'); return; }
 
     const updatedData = { 
         emoji, 
@@ -237,11 +261,13 @@ function saveProductUpdate() {
         has_fixed: hasFixed,
         has_sqm: hasSqm,
         has_kg: hasKg,
+        has_meter: hasMeter,
         price_s: hasFixed ? (parseFloat(document.getElementById('edit-p-s').value) || 0) : 0,
         price_m: hasFixed ? (parseFloat(document.getElementById('edit-p-m').value) || 0) : 0,
         price_l: hasFixed ? (parseFloat(document.getElementById('edit-p-l').value) || 0) : 0,
         price_sqm: hasSqm ? (parseFloat(document.getElementById('edit-p-sqm').value) || 0) : 0,
-        price_kg: hasKg ? (parseFloat(document.getElementById('edit-p-kg').value) || 0) : 0
+        price_kg: hasKg ? (parseFloat(document.getElementById('edit-p-kg').value) || 0) : 0,
+        price_meter: hasMeter ? (parseFloat(document.getElementById('edit-p-meter').value) || 0) : 0
     };
     
     supabaseFetch('PATCH', `products?id=eq.${id}`, updatedData, (err) => {
@@ -259,9 +285,10 @@ function addNewProductType() {
     const hasFixed = document.getElementById('check-fixed').checked;
     const hasSqm = document.getElementById('check-sqm').checked;
     const hasKg = document.getElementById('check-kg').checked;
+    const hasMeter = document.getElementById('check-meter').checked;
 
     if (!name) { showToast('❌ Mahsulot nomini kiriting', 'error'); return; }
-    if (!hasFixed && !hasSqm && !hasKg) { showToast('❌ Kamida bitta hisoblash turini tanlang', 'error'); return; }
+    if (!hasFixed && !hasSqm && !hasKg && !hasMeter) { showToast('❌ Kamida bitta hisoblash turini tanlang', 'error'); return; }
 
     const newProduct = { 
         emoji, 
@@ -269,11 +296,13 @@ function addNewProductType() {
         has_fixed: hasFixed,
         has_sqm: hasSqm,
         has_kg: hasKg,
+        has_meter: hasMeter,
         price_s: hasFixed ? (parseFloat(document.getElementById('new-p-s').value) || 0) : 0,
         price_m: hasFixed ? (parseFloat(document.getElementById('new-p-m').value) || 0) : 0,
         price_l: hasFixed ? (parseFloat(document.getElementById('new-p-l').value) || 0) : 0,
         price_sqm: hasSqm ? (parseFloat(document.getElementById('new-p-sqm').value) || 0) : 0,
-        price_kg: hasKg ? (parseFloat(document.getElementById('new-p-kg').value) || 0) : 0
+        price_kg: hasKg ? (parseFloat(document.getElementById('new-p-kg').value) || 0) : 0,
+        price_meter: hasMeter ? (parseFloat(document.getElementById('new-p-meter').value) || 0) : 0
     };
     
     supabaseFetch('POST', 'products', newProduct, (err) => {
@@ -287,12 +316,15 @@ function addNewProductType() {
         document.getElementById('new-p-l').value = '';
         document.getElementById('new-p-sqm').value = '';
         document.getElementById('new-p-kg').value = '';
+        document.getElementById('new-p-meter').value = '';
         document.getElementById('check-fixed').checked = false;
         document.getElementById('check-sqm').checked = false;
         document.getElementById('check-kg').checked = false;
+        document.getElementById('check-meter').checked = false;
         document.getElementById('fixed-prices-input').style.display = 'none';
         document.getElementById('sqm-price-input').style.display = 'none';
         document.getElementById('kg-price-input').style.display = 'none';
+        document.getElementById('meter-price-input').style.display = 'none';
         
         loadProductCatalog();
     });
@@ -615,8 +647,8 @@ function openOrderModal(id) {
                                 <div style="font-weight:700; margin-bottom:5px; border-bottom:1px solid #f0f0f0; padding-bottom:5px;">${group.emoji || '📦'} ${group.name}</div>
                                 ${items.map(item => `
                                     <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--gray); margin-bottom:3px;">
-                                        <span>${item.type}: ${item.type === 'sqm' ? (item.area || 0).toFixed(2) + ' m²' : (item.count || 0) + ' ta'}</span>
-                                        <strong style="color:var(--dark);">${formatMoney(item.type === 'sqm' ? (item.area || 0) * (item.price || 0) : (item.count || 0) * (item.price || 0))}</strong>
+                                        <span>${translateType(item.type)}: ${item.count || 1} ta ${item.type === 'sqm' ? '(' + (item.area || 0).toFixed(2) + ' m²)' : (item.type === 'KG' ? '(' + (item.area || 0).toFixed(1) + ' kg)' : (item.type === 'meter' ? '(' + (item.value || 0).toFixed(1) + ' m)' : ''))}</span>
+                                        <strong style="color:var(--dark);">${formatMoney(item.type === 'sqm' || item.type === 'KG' ? (item.area || 0) * (item.price || 0) : (item.type === 'meter' ? (item.value || 0) * (item.price || 0) : (item.count || 0) * (item.price || 0)))}</strong>
                                     </div>
                                 `).join('')}
                             </div>

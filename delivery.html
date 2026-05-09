@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dispetcher | Gilam Zakaz</title>
+    <title>Dastavchik | Gilam Zakaz</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/refine_styles.css">
 </head>
 <body>
     <div id="loadingScreen" class="loading-screen">
@@ -20,7 +21,7 @@
         <div id="homePage" class="page active">
             <div class="mobile-header">
                 <div class="welcome-section">
-                    <h1 id="welcomeTitle">Dispetcher</h1>
+                    <h1>Dastavchik</h1>
                     <div class="date" id="currentDate">...</div>
                 </div>
                 <button class="admin-btn" onclick="window.location.href='index.html'">
@@ -30,180 +31,212 @@
 
             <div class="stats-cards">
                 <div class="stat-card">
-                    <i class="fas fa-shopping-basket" style="color: var(--primary);"></i>
-                    <div class="stat-value" id="totalOrdersStat">0</div>
-                    <div class="stat-label">Jami</div>
+                    <i class="fas fa-clock" style="color: var(--warning);"></i>
+                    <div class="stat-value" id="stat-kutilmoqda">0</div>
+                    <div class="stat-label">Kutilmoqda</div>
                 </div>
                 <div class="stat-card">
-                    <i class="fas fa-calendar-check" style="color: var(--success);"></i>
-                    <div class="stat-value" id="todayOrdersStat">0</div>
-                    <div class="stat-label">Bugun</div>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-money-bill-wave" style="color: var(--warning);"></i>
-                    <div class="stat-value" id="todayRevenueStat">0</div>
-                    <div class="stat-label">Summa</div>
+                    <i class="fas fa-check-double" style="color: var(--success);"></i>
+                    <div class="stat-value" id="stat-tayyor">0</div>
+                    <div class="stat-label">Tayyor</div>
                 </div>
             </div>
 
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" placeholder="Ism, telefon yoki #ID orqali qidirish..." oninput="globalSearch(this.value)">
-            </div>
-
-            <div class="section-header">
-                <h2>Oxirgi zakazlar</h2>
-            </div>
-            <div id="recentOrders" class="orders-list">
-                <!-- Orders will be loaded here -->
-            </div>
-        </div>
-
-        <!-- NEW ORDER PAGE -->
-        <div id="neworderPage" class="page">
-            <h1 class="page-title">Yangi buyurtma</h1>
-            
-            <div class="form-group">
-                <label><i class="fas fa-user"></i> Ism Familiya</label>
-                <input type="text" id="fo-name" placeholder="Masalan: Alisher">
-            </div>
-
-            <div class="form-group">
-                <label><i class="fas fa-phone"></i> Telefon raqam</label>
-                <div class="phone-input-wrapper">
-                    <span class="phone-prefix">+998</span>
-                    <input type="tel" id="fo-phone" placeholder="90 123-45-67" oninput="formatPhoneInput(this)" onkeydown="handlePhoneKey(event, this)">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label><i class="fas fa-map-marker-alt"></i> Manzil / Qishloq</label>
-                <input type="text" id="fo-village" placeholder="Qishloq nomi, ko'cha, uy">
-            </div>
-
-            <div class="form-group">
-                <label><i class="fas fa-comment"></i> Izoh (ixtiyoriy)</label>
-                <textarea id="fo-comment" rows="2" placeholder="Qo'shimcha ma'lumotlar..."></textarea>
-            </div>
-
-            <button class="btn-save" id="fo-saveBtn" onclick="saveDispatcherOrder()">
-                <i class="fas fa-check"></i> Buyurtmani saqlash
-            </button>
-        </div>
-
-        <!-- TODAY PAGE -->
-        <div id="todayPage" class="page">
-            <div class="queue-header">
-                <h1 class="page-title">Bugungi zakazlar</h1>
-                <div class="queue-total" id="todayTotal">0 ta</div>
-            </div>
-            
             <div class="filter-chips">
-                <button class="chip active" onclick="setTodayFilter(this, 'all')">Hammasi</button>
-                <button class="chip" onclick="setTodayFilter(this, 'new')">Kutilmoqda</button>
-                <button class="chip" onclick="setTodayFilter(this, 'washing')">Yuvilmoqda</button>
-                <button class="chip" onclick="setTodayFilter(this, 'ready')">Tayyor</button>
-                <button class="chip" onclick="setTodayFilter(this, 'done')">Yetgazildi</button>
+                <button class="chip active" onclick="setFilter(this, 'new')">Kutilmoqda</button>
+                <button class="chip" onclick="setFilter(this, 'ready')">Tayyor</button>
+                <button class="chip" onclick="setFilter(this, 'done')">Yetkazildi</button>
+                <button class="chip" onclick="setFilter(this, 'all')">Hammasi</button>
             </div>
 
-            <div id="todayOrdersList" class="queue-list">
-                <!-- Today's orders will be loaded here -->
+            <div id="ordersList" class="orders-list"></div>
+        </div>
+
+        <!-- REFINE PAGE -->
+        <div id="refinePage" class="page">
+            <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px;">
+                <button class="admin-btn" onclick="switchPage('home')" style="width:40px;height:40px;font-size:16px;"><i class="fas fa-arrow-left"></i></button>
+                <h1 style="margin:0; font-size:24px;">Buyurtmani sozlash</h1>
+            </div>
+
+            <div id="refine-header" class="det-header-card" style="margin-bottom:20px;"></div>
+
+            <div style="padding-bottom: 220px;"> <!-- Space for sticky footer -->
+                <div class="form-group">
+                    <label><i class="fas fa-location-dot"></i> GPS Lokatsiya</label>
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="refine-gps" readonly placeholder="Hali olinmadi">
+                        <button class="btn-save" style="width:auto; padding:0 20px; white-space:nowrap;" onclick="getGPS()">
+                            <i class="fas fa-location-crosshairs"></i> GPS
+                        </button>
+                    </div>
+                </div>
+
+                <div class="section-header">
+                    <h2>📦 Mahsulotlar ro'yxati</h2>
+                    <button class="see-all" onclick="openAddProduct()">+ Qo'shish</button>
+                </div>
+                <div id="productList"></div>
+            </div>
+
+            <!-- COMPACT SUMMARY FOOTER -->
+            <div class="refine-summary-footer">
+                <div id="summary-cards" class="summary-details-grid">
+                    <!-- Dynamic summary cards -->
+                </div>
+                <div class="total-price-row">
+                    <span class="total-price-label">JAMI SUMMA:</span>
+                    <span id="total-price" class="total-price-value">0 so'm</span>
+                </div>
+                <button class="btn-save-full" onclick="saveRefinedOrder()" style="margin-top:15px; height:55px;">
+                    <i class="fas fa-check-circle"></i> TASDIQLASH VA SAQLASH
+                </button>
             </div>
         </div>
 
-        <!-- STATISTICS PAGE -->
-        <div id="statsPage" class="page">
-            <div class="mobile-header">
-                <h1>Statistika</h1>
-                <div class="date" id="statsDate">...</div>
-            </div>
+        <!-- PRODUCT MODAL -->
+        <div id="productModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modalTitle">Mahsulot qo'shish</h2>
+                    <button class="close-btn" onclick="closeProductModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <!-- Section 1: Catalog -->
+                    <div id="catalogSection">
+                        <div class="section-header" style="margin-bottom:15px;">
+                            <h3>Katalogdan tanlang</h3>
+                        </div>
+                        <div id="dynamic-product-buttons" class="quick-actions">
+                            <!-- Buttons like "Gilam", "Adyol" go here -->
+                        </div>
+                        
+                        <div style="margin:25px 0; border-top:1px solid #eee; padding-top:20px;">
+                            <div class="section-header">
+                                <h3>Katalogda yo'q mahsulot bo'lsa:</h3>
+                            </div>
+                            <div class="form-group" style="margin-bottom:15px;">
+                                <label style="font-size:12px; color:var(--gray); margin-bottom:5px; display:block;">Mahsulot nomi</label>
+                                <input type="text" id="other-name" placeholder="Masalan: Parda">
+                            </div>
+                            
+                            <label style="font-size:12px; color:var(--gray); margin-bottom:8px; display:block;">Hisoblash turi:</label>
+                            <div class="counter-grid" style="grid-template-columns: repeat(2, 1fr); gap:10px; margin-bottom:15px;">
+                                <div id="type-sqm" class="counter-btn active" onclick="selectOtherType('sqm')" style="padding:12px 5px;">
+                                    <span class="counter-label" style="font-size:10px;">Kvadrat (m²)</span>
+                                </div>
+                                <div id="type-kg" class="counter-btn" onclick="selectOtherType('kg')" style="padding:12px 5px;">
+                                    <span class="counter-label" style="font-size:10px;">Og'irlik (kg)</span>
+                                </div>
+                                <div id="type-meter" class="counter-btn" onclick="selectOtherType('meter')" style="padding:12px 5px;">
+                                    <span class="counter-label" style="font-size:10px;">Metr (m)</span>
+                                </div>
+                                <div id="type-fixed" class="counter-btn" onclick="selectOtherType('fixed')" style="padding:12px 5px;">
+                                    <span class="counter-label" style="font-size:10px;">Dona (S/M/L)</span>
+                                </div>
+                            </div>
 
-            <div class="stats-cards">
-                <div class="stat-card">
-                    <i class="fas fa-shopping-basket" style="color: var(--primary);"></i>
-                    <div class="stat-value" id="stats-today-count">0</div>
-                    <div class="stat-label">Bugungi zakazlar</div>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-money-bill-wave" style="color: var(--success);"></i>
-                    <div class="stat-value" id="stats-today-revenue">0</div>
-                    <div class="stat-label">Summa</div>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-chart-pie" style="color: var(--warning);"></i>
-                    <div class="stat-value" id="stats-today-avg">0</div>
-                    <div class="stat-label">O'rtacha</div>
-                </div>
-            </div>
+                            <button class="btn-save" style="width:100%; height:50px; font-weight:700;" onclick="addOtherProduct()">
+                                <i class="fas fa-magic"></i> KATALOGGA QO'SHISH VA TANLASH
+                            </button>
+                        </div>
+                    </div>
 
-            <div style="background:var(--white); padding:20px; border-radius:15px; margin-top:20px; box-shadow:var(--shadow);">
-                <h3 style="margin-bottom:15px;"><i class="fas fa-chart-column"></i> Holat bo'ylab</h3>
-                <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:15px;">
-                    <div style="text-align:center; padding:15px; background:var(--light-secondary); border-radius:12px;">
-                        <div style="font-size:20px; margin-bottom:5px;">⏳</div>
-                        <div style="font-size:12px; color:var(--gray); margin-bottom:8px;">Kutilmoqda</div>
-                        <div style="font-weight:700; font-size:18px; color:var(--warning);" id="stats-status-new">0</div>
-                    </div>
-                    <div style="text-align:center; padding:15px; background:var(--light-secondary); border-radius:12px;">
-                        <div style="font-size:20px; margin-bottom:5px;">🧼</div>
-                        <div style="font-size:12px; color:var(--gray); margin-bottom:8px;">Yuvilmoqda</div>
-                        <div style="font-weight:700; font-size:18px; color:var(--info);" id="stats-status-washing">0</div>
-                    </div>
-                    <div style="text-align:center; padding:15px; background:var(--light-secondary); border-radius:12px;">
-                        <div style="font-size:20px; margin-bottom:5px;">✅</div>
-                        <div style="font-size:12px; color:var(--gray); margin-bottom:8px;">Tayyor</div>
-                        <div style="font-weight:700; font-size:18px; color:var(--success);" id="stats-status-ready">0</div>
-                    </div>
-                    <div style="text-align:center; padding:15px; background:var(--light-secondary); border-radius:12px;">
-                        <div style="font-size:20px; margin-bottom:5px;">🚚</div>
-                        <div style="font-size:12px; color:var(--gray); margin-bottom:8px;">Yetgazildi</div>
-                        <div style="font-weight:700; font-size:18px; color:var(--primary);" id="stats-status-done">0</div>
+                    <!-- Section 2: Refine Selection (Quantities) -->
+                    <div id="refineSection" style="display:none;">
+                        <button class="btn-cancel" onclick="backToCatalog()" style="margin-bottom:15px; border:none; background:var(--bg);">
+                            <i class="fas fa-chevron-left"></i> Orqaga
+                        </button>
+                        
+                        <div style="text-align:center; margin-bottom:20px;">
+                            <span id="sel-emoji" style="font-size:50px; display:block; margin-bottom:10px;"></span>
+                            <h2 id="sel-name" style="margin:0;"></h2>
+                            <div id="sel-min-price" style="font-size:14px; color:var(--gray); margin-top:5px; font-weight:600;"></div>
+                        </div>
+
+                        <div class="counter-grid">
+                            <div id="btn-s" class="counter-btn" onclick="increment('s')">
+                                <span class="counter-label">Kichik</span>
+                                <span class="counter-value" id="val-s">0</span>
+                                <div class="counter-badge" id="badge-s" style="display:none;">0</div>
+                            </div>
+                            <div id="btn-m" class="counter-btn" onclick="increment('m')">
+                                <span class="counter-label">O'rtacha</span>
+                                <span class="counter-value" id="val-m">0</span>
+                                <div class="counter-badge" id="badge-m" style="display:none;">0</div>
+                            </div>
+                            <div id="btn-l" class="counter-btn" onclick="increment('l')">
+                                <span class="counter-label">Katta</span>
+                                <span class="counter-value" id="val-l">0</span>
+                                <div class="counter-badge" id="badge-l" style="display:none;">0</div>
+                            </div>
+                            <div id="btn-kg" class="counter-btn" onclick="increment('kg')">
+                                <span class="counter-label">Kilogram</span>
+                                <span class="counter-value" id="val-kg">0</span>
+                                <div class="counter-badge" id="badge-kg" style="display:none;">0</div>
+                            </div>
+                        </div>
+
+                        <div id="sqmInputArea" style="display:none; margin-bottom:20px; padding:18px; background:var(--bg); border-radius:20px; border:1px solid var(--border);">
+                            <label style="font-weight:800; margin-bottom:12px; display:block; color:var(--dark); font-size:14px;">Soni va umumiy hajmi (m²):</label>
+                            <div style="display:flex; align-items:center; gap:15px;">
+                                <div class="stepper-control">
+                                    <button class="stepper-btn" onclick="updateModalSqmCount(-1)">-</button>
+                                    <span id="sqm-modal-count" class="stepper-val">1</span>
+                                    <button class="stepper-btn" onclick="updateModalSqmCount(1)">+</button>
+                                </div>
+                                <input type="number" id="sqm-total-val" placeholder="Jami m²" step="0.1" class="sqm-val">
+                            </div>
+                        </div>
+
+                        <div id="kgInputArea" style="display:none; margin-bottom:20px; padding:18px; background:var(--bg); border-radius:20px; border:1px solid var(--border);">
+                            <label style="font-weight:800; margin-bottom:12px; display:block; color:var(--dark); font-size:14px;">Soni va umumiy og'irligi (kg):</label>
+                            <div style="display:flex; align-items:center; gap:15px;">
+                                <div class="stepper-control">
+                                    <button class="stepper-btn" onclick="updateModalKgCount(-1)">-</button>
+                                    <span id="kg-modal-count" class="stepper-val">1</span>
+                                    <button class="stepper-btn" onclick="updateModalKgCount(1)">+</button>
+                                </div>
+                                <input type="number" id="kg-total-val" placeholder="Jami kg" step="0.1" class="sqm-val">
+                            </div>
+                        </div>
+
+                        <div id="meterInputArea" style="display:none; margin-bottom:20px; padding:18px; background:var(--bg); border-radius:20px; border:1px solid var(--border);">
+                            <label style="font-weight:800; margin-bottom:12px; display:block; color:var(--dark); font-size:14px;">Soni va umumiy uzunligi (m):</label>
+                            <div style="display:flex; align-items:center; gap:15px;">
+                                <div class="stepper-control">
+                                    <button class="stepper-btn" onclick="updateModalMeterCount(-1)">-</button>
+                                    <span id="meter-modal-count" class="stepper-val">1</span>
+                                    <button class="stepper-btn" onclick="updateModalMeterCount(1)">+</button>
+                                </div>
+                                <input type="number" id="meter-total-val" placeholder="Jami m" step="0.1" class="sqm-val">
+                            </div>
+                        </div>
+
+                        <button class="btn-save-full" onclick="confirmProductAdd()" style="margin-top:20px; height:55px;">
+                            <i class="fas fa-check"></i> TANLANDI
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- BOTTOM NAVIGATION -->
-    <nav class="bottom-nav">
-        <button class="nav-item active" data-page="home" onclick="switchPage('home')">
-            <i class="fas fa-home"></i>
-            <span>Asosiy</span>
-        </button>
-        <button class="nav-item" data-page="today" onclick="switchPage('today')">
-            <i class="fas fa-calendar-day"></i>
-            <span>Bugun</span>
-            <div class="nav-badge" id="todayBadge">0</div>
-        </button>
-        <button class="nav-item add-btn" onclick="switchPage('neworder')">
-            <i class="fas fa-plus"></i>
-            <span class="add-btn-label">QO'SHISH</span>
-        </button>
-        <button class="nav-item" data-page="stats" onclick="switchPage('stats')">
-            <i class="fas fa-chart-pie"></i>
-            <span>Stat</span>
-        </button>
-        <button class="nav-item" onclick="window.location.href='index.html'">
-            <i class="fas fa-user"></i>
-            <span>Profil</span>
-        </button>
-    </nav>
-
-    <!-- DETAILS MODAL -->
-    <div id="detailsModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2><i class="fas fa-info-circle"></i> Tafsilotlar</h2>
-                <button class="close-btn" onclick="closeDetailsModal()">✕</button>
+        <!-- DETAILS MODAL -->
+        <div id="detailsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-info-circle"></i> Tafsilotlar</h2>
+                    <button class="close-btn" onclick="closeDetailsModal()">✕</button>
+                </div>
+                <div class="modal-body" id="detailsContent"></div>
+                <div id="detailsNavigation"></div>
             </div>
-            <div class="modal-body" id="detailsContent"></div>
-            <div id="detailsNavigation"></div>
         </div>
     </div>
 
     <div id="toast" class="toast"></div>
 
     <script src="js/common.js"></script>
-    <script src="js/dispatcher.js"></script>
+    <script src="js/delivery.js"></script>
 </body>
 </html>

@@ -8,8 +8,19 @@ let PRICE_PER_SQM = 20000;
 
 // State for the product being added in the modal
 let activeProduct = null;
-let activeCounters = { s: 0, m: 0, l: 0, kg: 0 };
+let activeCounters = { s: 0, m: 0, l: 0, kg: 0, meter: 0 };
 let activeSqmItems = [];
+
+// Stepper values for modal
+let modalSqmCount = 1;
+let modalKgCount = 1;
+let modalMeterCount = 1;
+
+let otherSelectedType = 'sqm';
+
+function updateModalSqmCount(delta) { modalSqmCount = Math.max(1, modalSqmCount + delta); document.getElementById('sqm-modal-count').textContent = modalSqmCount; }
+function updateModalKgCount(delta) { modalKgCount = Math.max(1, modalKgCount + delta); document.getElementById('kg-modal-count').textContent = modalKgCount; }
+function updateModalMeterCount(delta) { modalMeterCount = Math.max(1, modalMeterCount + delta); document.getElementById('meter-modal-count').textContent = modalMeterCount; }
 
 document.addEventListener('DOMContentLoaded', function() {
     updateDateTime();
@@ -18,25 +29,18 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function loadInitialData() {
-    // 1. Global narxni yuklash
     supabaseFetch('GET', 'settings?key=eq.global_price', null, function(err, data) {
         if (!err && data && data.length > 0) {
             PRICE_PER_SQM = parseFloat(data[0].value) || 20000;
         }
     });
-
-    // 2. Mahsulotlar katalogini yuklash
     loadProductCatalog();
-
-    // 3. Orderlarni yuklash
     loadOrders();
 }
 
 function loadProductCatalog() {
     supabaseFetch('GET', 'products?select=*&order=created_at.asc', null, function(err, data) {
-        if (!err && data) {
-            productCatalog = data;
-        }
+        if (!err && data) productCatalog = data;
     });
 }
 
@@ -55,17 +59,10 @@ function updateUI() {
 }
 
 function updateStats() {
-    const kutil = orders.filter(o => o.status === 'new' || o.status === 'queue').length;
-    const yuvil = orders.filter(o => o.status === 'washing').length;
+    const kutil = orders.filter(o => o.status === 'new' || o.status === 'active').length;
     const tayyor = orders.filter(o => o.status === 'ready').length;
-
-    const elK = document.getElementById('stat-kutilmoqda');
-    const elY = document.getElementById('stat-yuvilmoqda');
-    const elT = document.getElementById('stat-tayyor');
-    
-    if (elK) elK.textContent = kutil;
-    if (elY) elY.textContent = yuvil;
-    if (elT) elT.textContent = tayyor;
+    if (document.getElementById('stat-kutilmoqda')) document.getElementById('stat-kutilmoqda').textContent = kutil;
+    if (document.getElementById('stat-tayyor')) document.getElementById('stat-tayyor').textContent = tayyor;
 }
 
 function displayOrders() {
@@ -81,21 +78,27 @@ function displayOrders() {
     container.innerHTML = filtered.length ? '' : '<p class="empty-state">Buyurtmalar topilmadi</p>';
     filtered.forEach(order => {
         const sc = STATUS_CFG[order.status] || STATUS_CFG.new;
-        const hasGPS = order.gpsCoords && String(order.gpsCoords).length > 5;
-        
         const div = document.createElement('div');
         div.className = `order-card status-${order.status}`;
         div.innerHTML = `
             <div class="order-header">
-                <span class="order-id">#${order.displayId} ${hasGPS ? '<i class="fas fa-location-dot" style="color:var(--primary); font-size:10px;" title="GPS bor"></i>' : ''}</span>
+                <span class="order-id">#${order.displayId}</span>
                 <span class="order-status-pill" style="background:${sc.bg};color:${sc.color};padding:4px 10px;border-radius:12px;font-size:12px;font-weight:700;">
                     ${sc.emoji} ${sc.label}
                 </span>
             </div>
-            <div class="order-phone">👤 ${order.customerName || 'Noma\'lum'}</div>
-            <div class="order-phone">📞 ${order.phone}</div>
-            <div style="font-size:11px; color:var(--gray); margin-top:5px;"><i class="far fa-clock"></i> ${formatDateTime(order.createdAt)}</div>
-            <div class="order-details">📍 ${order.location}</div>
+            <div class="order-phone">
+                <i class="fas fa-user-circle" style="color:var(--primary); font-size:20px;"></i>
+                <span>${order.customerName || 'Noma\'lum'}</span>
+            </div>
+            <div style="font-weight:700; color:var(--primary); margin-bottom:4px; font-size:14px;">
+                <i class="fas fa-phone-alt" style="font-size:12px;"></i> ${order.phone}
+            </div>
+            ${getOrderSummaryHtml(order.productItems)}
+            <div class="order-details">
+                <span><i class="fas fa-map-marker-alt"></i> ${order.location}</span>
+                <span style="font-weight:800; color:var(--success); font-size:15px;">${formatMoney(order.price)}</span>
+            </div>
         `;
         div.onclick = () => openDeliveryDetails(order);
         container.appendChild(div);
@@ -105,25 +108,15 @@ function displayOrders() {
 function startRefining(order) {
     currentOrder = order;
     refinedProducts = order.productItems || [];
-    
-    // Auto-activate order if it's new
     if (order.status === 'new') {
-        supabaseFetch('PATCH', `orders?id=eq.${order.id}`, { status: 'active' }, err => {
-            if (!err) {
-                order.status = 'active';
-                loadOrders(); // Refresh in background
-            }
-        });
+        supabaseFetch('PATCH', `orders?id=eq.${order.id}`, { status: 'active' }, () => loadOrders());
     }
-
     switchPage('refine');
-    
     const header = document.getElementById('refine-header');
     header.innerHTML = `
         <div style="font-weight:800; font-size:20px;">#${order.displayId} - ${order.customerName}</div>
         <div style="font-size:14px; opacity:0.8;">📍 ${order.location} | 📞 ${order.phone}</div>
     `;
-    
     document.getElementById('refine-gps').value = order.gpsCoords || '';
     renderProducts();
 }
@@ -131,507 +124,283 @@ function startRefining(order) {
 function openAddProduct() {
     const container = document.getElementById('dynamic-product-buttons');
     if (!container) return;
-    
     container.innerHTML = '';
     productCatalog.forEach(p => {
         const btn = document.createElement('button');
         btn.className = 'action-btn';
-        btn.style.flexDirection = 'column';
-        btn.style.height = 'auto';
-        btn.style.padding = '15px';
-        btn.innerHTML = `
-            <span style="font-size:30px; margin-bottom:5px;">${p.emoji}</span>
-            <span style="font-weight:700;">${p.name}</span>
-        `;
+        btn.innerHTML = `<span style="font-size:24px;">${p.emoji}</span><span>${p.name}</span>`;
         btn.onclick = () => startProductRefinement(p);
         container.appendChild(btn);
     });
-    
     document.getElementById('catalogSection').style.display = 'block';
     document.getElementById('refineSection').style.display = 'none';
-    document.getElementById('modalTitle').textContent = 'Mahsulot qo\'shish';
     document.getElementById('productModal').classList.add('show');
 }
 
-function startProductRefinement(p) {
-    activeProduct = p;
-    activeCounters = { s: 0, m: 0, l: 0, kg: 0 };
-    activeSqmItems = [];
-
-    document.getElementById('catalogSection').style.display = 'none';
-    document.getElementById('refineSection').style.display = 'block';
-    document.getElementById('modalTitle').textContent = 'Miqdorini belgilang';
-    
-    document.getElementById('sel-emoji').textContent = p.emoji;
-    document.getElementById('sel-name').textContent = p.name;
-
-    // Show/Hide buttons based on product capabilities
-    document.getElementById('btn-s').style.display = p.has_fixed && p.price_s > 0 ? 'block' : 'none';
-    document.getElementById('btn-m').style.display = p.has_fixed && p.price_m > 0 ? 'block' : 'none';
-    document.getElementById('btn-l').style.display = p.has_fixed && p.price_l > 0 ? 'block' : 'none';
-    document.getElementById('btn-kg').style.display = p.has_kg && p.price_kg > 0 ? 'block' : 'none';
-    
-    document.getElementById('sqmInputArea').style.display = p.has_sqm ? 'block' : 'none';
-    
-    updateCounterUI();
-    document.getElementById('sqmRows').innerHTML = '';
-    if (p.has_sqm) addSqmRow();
-}
-
-function increment(type) {
-    activeCounters[type]++;
-    updateCounterUI();
-}
-
-function updateCounterUI() {
-    ['s', 'm', 'l', 'kg'].forEach(type => {
-        const val = activeCounters[type];
-        const valEl = document.getElementById(`val-${type}`);
-        const badgeEl = document.getElementById(`badge-${type}`);
-        const btnEl = document.getElementById(`btn-${type}`);
-        
-        if (valEl) valEl.textContent = val > 0 ? val : '0';
-        if (badgeEl) {
-            badgeEl.textContent = val;
-            badgeEl.style.display = val > 0 ? 'flex' : 'none';
-        }
-        if (btnEl) {
-            if (val > 0) btnEl.classList.add('active');
-            else btnEl.classList.remove('active');
-        }
-    });
-}
-
-function addSqmRow() {
-    const container = document.getElementById('sqmRows');
-    const rowId = Date.now();
-    const div = document.createElement('div');
-    div.className = 'sqm-item-row';
-    div.id = `sqm-row-${rowId}`;
-    div.innerHTML = `
-        <input type="number" placeholder="Maydoni (m²)" step="0.1" class="sqm-val" style="flex: 1;">
-        <button class="btn-action" style="color:var(--danger);" onclick="removeSqmRow(${rowId})">✕</button>
-    `;
-    container.appendChild(div);
-}
-
-function removeSqmRow(id) {
-    const el = document.getElementById(`sqm-row-${id}`);
-    if (el) el.remove();
-}
-
-function backToCatalog() {
-    document.getElementById('catalogSection').style.display = 'block';
-    document.getElementById('refineSection').style.display = 'none';
-    document.getElementById('modalTitle').textContent = 'Mahsulot qo\'shish';
-}
-
-function confirmProductAdd() {
-    const product = activeProduct;
-    const itemsToAdd = [];
-
-    // 1. Add fixed sizes
-    if (activeCounters.s > 0) itemsToAdd.push({ type: 'S', count: activeCounters.s, price: product.price_s });
-    if (activeCounters.m > 0) itemsToAdd.push({ type: 'M', count: activeCounters.m, price: product.price_m });
-    if (activeCounters.l > 0) itemsToAdd.push({ type: 'L', count: activeCounters.l, price: product.price_l });
-    
-    // 2. Add KG
-    if (activeCounters.kg > 0) itemsToAdd.push({ type: 'KG', count: activeCounters.kg, price: product.price_kg });
-
-    // 3. Add SQM items
-    const sqmRows = document.querySelectorAll('.sqm-item-row');
-    sqmRows.forEach(row => {
-        const input = row.querySelector('.sqm-val');
-        if (input) {
-            const area = parseFloat(input.value) || 0;
-            if (area > 0) {
-                itemsToAdd.push({ type: 'sqm', area: area, price: product.price_sqm });
-            }
-        }
-    });
-
-    if (itemsToAdd.length === 0) {
-        showToast('❌ Kamida bitta miqdor kiriting', 'error');
-        return;
-    }
-
-    // Add to refinedProducts
-    // Check if this product already exists in refinedProducts to group them
-    let existingEntry = refinedProducts.find(p => p.productId === product.id);
-    if (!existingEntry) {
-        existingEntry = {
-            productId: product.id,
-            name: product.name,
-            emoji: product.emoji,
-            items: []
-        };
-        refinedProducts.push(existingEntry);
-    }
-
-    // Append new items
-    existingEntry.items.push(...itemsToAdd);
-
-    closeProductModal();
-    renderProducts();
+function selectOtherType(type) {
+    otherSelectedType = type;
+    document.querySelectorAll('[id^="type-"]').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`type-${type}`).classList.add('active');
 }
 
 function addOtherProduct() {
     const name = document.getElementById('other-name').value.trim();
-    if (!name) return;
+    if (!name) { showToast('❌ Mahsulot nomini kiriting', 'error'); return; }
 
-    // Automatic catalog addition
     const newProduct = {
         emoji: '📦',
         name: name,
-        has_fixed: false,
-        has_sqm: true,
-        has_kg: false,
-        price_sqm: PRICE_PER_SQM
+        has_fixed: otherSelectedType === 'fixed',
+        has_sqm: otherSelectedType === 'sqm',
+        has_kg: otherSelectedType === 'kg',
+        has_meter: otherSelectedType === 'meter',
+        price_s: otherSelectedType === 'fixed' ? 15000 : 0,
+        price_m: otherSelectedType === 'fixed' ? 25000 : 0,
+        price_l: otherSelectedType === 'fixed' ? 35000 : 0,
+        price_sqm: otherSelectedType === 'sqm' ? PRICE_PER_SQM : 0,
+        price_kg: otherSelectedType === 'kg' ? 10000 : 0,
+        price_meter: otherSelectedType === 'meter' ? 5000 : 0,
+        created_at: new Date().toISOString()
     };
 
+    showToast('⌛ Katalogga qo\'shilmoqda...', 'info');
+    
     supabaseFetch('POST', 'products', newProduct, (err, res) => {
-        if (err) {
-            // If failed to add to catalog, just add to order locally
-            const entry = {
-                productId: 'other-' + Date.now(),
-                name: name,
-                emoji: '📦',
-                items: [{ type: 'sqm', area: 0, price: PRICE_PER_SQM }]
-            };
-            refinedProducts.push(entry);
-            renderProducts();
-            showToast('✅ Qo\'shildi (Katalogga saqlanmadi)', 'info');
-        } else {
-            // Added to catalog successfully, reload catalog
-            loadProductCatalog();
-            const entry = {
-                productId: res[0].id,
-                name: name,
-                emoji: '📦',
-                items: [{ type: 'sqm', width: 0, height: 0, area: 0, price: PRICE_PER_SQM }]
-            };
-            refinedProducts.push(entry);
-            renderProducts();
-            showToast('✅ Katalogga qo\'shildi va buyurtmaga kiritildi', 'success');
-        }
+        if (err) { showToast('❌ Katalogga saqlab bo\'lmadi: ' + err, 'error'); return; }
+        showToast('✅ Katalogga qo\'shildi', 'success');
         document.getElementById('other-name').value = '';
-        closeProductModal();
+        loadProductCatalog();
+        if (res && res[0]) startProductRefinement(res[0]);
     });
+}
+
+function startProductRefinement(p) {
+    activeProduct = p;
+    activeCounters = { s: 0, m: 0, l: 0, kg: 0, meter: 0 };
+    modalSqmCount = 1; modalKgCount = 1; modalMeterCount = 1;
+    
+    document.getElementById('catalogSection').style.display = 'none';
+    document.getElementById('refineSection').style.display = 'block';
+    document.getElementById('sel-emoji').textContent = p.emoji;
+    document.getElementById('sel-name').textContent = p.name;
+    document.getElementById('sel-min-price').textContent = '';
+
+    // Step 1: Hide all optional areas first to prevent leftovers
+    document.getElementById('btn-s').style.display = 'none';
+    document.getElementById('btn-m').style.display = 'none';
+    document.getElementById('btn-l').style.display = 'none';
+    document.getElementById('btn-kg').style.display = 'none'; // Always hide KG button from grid
+    document.getElementById('sqmInputArea').style.display = 'none';
+    document.getElementById('kgInputArea').style.display = 'none';
+    document.getElementById('meterInputArea').style.display = 'none';
+
+    // Step 2: Show only authorized areas based on product flags
+    if (p.has_fixed) {
+        if (p.price_s > 0) {
+            document.getElementById('btn-s').style.display = 'flex';
+            document.getElementById('btn-s').innerHTML = `<span class="counter-label">Kichik</span><span class="counter-value" id="val-s">0</span><span class="counter-price-sub">${formatMoney(p.price_s)}</span><div class="counter-badge" id="badge-s" style="display:none;">0</div>`;
+        }
+        if (p.price_m > 0) {
+            document.getElementById('btn-m').style.display = 'flex';
+            document.getElementById('btn-m').innerHTML = `<span class="counter-label">O'rtacha</span><span class="counter-value" id="val-m">0</span><span class="counter-price-sub">${formatMoney(p.price_m)}</span><div class="counter-badge" id="badge-m" style="display:none;">0</div>`;
+        }
+        if (p.price_l > 0) {
+            document.getElementById('btn-l').style.display = 'flex';
+            document.getElementById('btn-l').innerHTML = `<span class="counter-label">Katta</span><span class="counter-value" id="val-l">0</span><span class="counter-price-sub">${formatMoney(p.price_l)}</span><div class="counter-badge" id="badge-l" style="display:none;">0</div>`;
+        }
+    }
+
+    if (p.has_sqm && p.price_sqm > 0) document.getElementById('sqmInputArea').style.display = 'block';
+    if (p.has_kg && p.price_kg > 0) document.getElementById('kgInputArea').style.display = 'block';
+    if (p.has_meter && p.price_meter > 0) document.getElementById('meterInputArea').style.display = 'block';
+    
+    // Step 3: Reset input fields
+    if (document.getElementById('sqm-total-val')) document.getElementById('sqm-total-val').value = '';
+    if (document.getElementById('kg-total-val')) document.getElementById('kg-total-val').value = '';
+    if (document.getElementById('meter-total-val')) document.getElementById('meter-total-val').value = '';
+    
+    document.getElementById('sqm-modal-count').textContent = '1';
+    document.getElementById('kg-modal-count').textContent = '1';
+    document.getElementById('meter-modal-count').textContent = '1';
+
+    updateCounterUI();
+}
+
+function increment(type) { activeCounters[type]++; updateCounterUI(); }
+function updateCounterUI() {
+    ['s', 'm', 'l', 'kg'].forEach(t => {
+        const valEl = document.getElementById(`val-${t}`);
+        const badgeEl = document.getElementById(`badge-${t}`);
+        if (valEl) valEl.textContent = activeCounters[t];
+        if (badgeEl) { badgeEl.textContent = activeCounters[t]; badgeEl.style.display = activeCounters[t] > 0 ? 'flex' : 'none'; }
+    });
+}
+
+function confirmProductAdd() {
+    const p = activeProduct;
+    const items = [];
+    if (activeCounters.s > 0) items.push({ type: 'S', count: activeCounters.s, price: p.price_s });
+    if (activeCounters.m > 0) items.push({ type: 'M', count: activeCounters.m, price: p.price_m });
+    if (activeCounters.l > 0) items.push({ type: 'L', count: activeCounters.l, price: p.price_l });
+    const sqmVal = parseFloat(document.getElementById('sqm-total-val').value) || 0;
+    if (p.has_sqm && sqmVal > 0) items.push({ type: 'sqm', count: modalSqmCount, area: sqmVal, price: p.price_sqm });
+    const kgVal = parseFloat(document.getElementById('kg-total-val').value) || 0;
+    if (p.has_kg && kgVal > 0) items.push({ type: 'KG', count: modalKgCount, area: kgVal, price: p.price_kg });
+    const meterVal = parseFloat(document.getElementById('meter-total-val').value) || 0;
+    if (p.has_meter && meterVal > 0) items.push({ type: 'meter', count: modalMeterCount, value: meterVal, price: p.price_meter });
+
+    if (items.length === 0) { showToast('❌ Miqdor kiriting', 'error'); return; }
+    
+    let existing = refinedProducts.find(x => x.productId === p.id);
+    if (existing) {
+        items.forEach(newItem => {
+            let found = existing.items.find(i => i.type === newItem.type);
+            if (found) {
+                found.count += newItem.count;
+                if (newItem.area) found.area = (found.area || 0) + newItem.area;
+                if (newItem.value) found.value = (found.value || 0) + newItem.value;
+            } else { existing.items.push(newItem); }
+        });
+    } else { refinedProducts.push({ productId: p.id, name: p.name, emoji: p.emoji, items }); }
+    closeProductModal();
+    renderProducts();
 }
 
 function renderProducts() {
     const container = document.getElementById('productList');
     if (!container) return;
     container.innerHTML = '';
-    
     refinedProducts.forEach((group, gIdx) => {
         const card = document.createElement('div');
         card.className = 'product-item-row';
-        card.style.display = 'block';
-        card.style.background = 'var(--white)';
-        card.style.padding = '15px';
-        card.style.borderRadius = '18px';
-        card.style.marginBottom = '12px';
-        card.style.boxShadow = 'var(--shadow)';
-
         let itemsHtml = '';
         group.items.forEach((item, iIdx) => {
-            if (item.type === 'sqm') {
-                itemsHtml += `
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-top:1px solid #eee;">
-                        <div style="font-size:14px;">
-                            <span style="color:var(--gray);">Maydoni:</span> 
-                            <input type="number" value="${item.area}" step="0.1" style="width:70px; border:none; border-bottom:1px solid #ccc; text-align:center; font-weight:700;" oninput="updateItem(${gIdx}, ${iIdx}, 'area', this.value)"> 
-                            <strong>m²</strong>
-                        </div>
-                        <button style="color:var(--danger); background:none; border:none;" onclick="removeItem(${gIdx}, ${iIdx})"><i class="fas fa-times"></i></button>
-                    </div>
-                `;
-            } else {
-                itemsHtml += `
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-top:1px solid #eee;">
-                        <div style="font-size:14px;">
-                            <span style="color:var(--gray); font-weight:700;">${item.type}:</span> 
-                            <input type="number" value="${item.count}" style="width:50px; border:none; border-bottom:1px solid #ccc; text-align:center; font-weight:700;" oninput="updateItem(${gIdx}, ${iIdx}, 'count', this.value)"> ta 
-                            <span style="color:var(--gray); margin-left:10px;">@ ${formatMoney(item.price)}</span>
-                        </div>
-                        <button style="color:var(--danger); background:none; border:none;" onclick="removeItem(${gIdx}, ${iIdx})"><i class="fas fa-times"></i></button>
-                    </div>
-                `;
-            }
-        });
+            const isFixed = ['S', 'M', 'L'].includes(item.type);
+            const unitPrice = item.price || 0;
+            let itemTotal = 0;
+            if (item.type === 'sqm' || item.type === 'KG') itemTotal = (item.area || 0) * unitPrice;
+            else if (item.type === 'meter') itemTotal = (item.value || 0) * unitPrice;
+            else itemTotal = (item.count || 0) * unitPrice;
 
-        card.innerHTML = `
-            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
-                <span style="font-size:24px;">${group.emoji || '📦'}</span>
-                <div style="font-weight:800; font-size:18px; color:var(--dark);">${group.name}</div>
-                <button class="close-btn" style="margin-left:auto; width:32px; height:32px; background:var(--bg); border-radius:50%; display:flex; align-items:center; justify-content:center; border:none; color:var(--danger);" onclick="removeGroup(${gIdx})">✕</button>
-            </div>
-            <div class="group-items">
-                ${itemsHtml}
-            </div>
-        `;
+            itemsHtml += `
+                <div style="display:flex; flex-direction:column; gap:12px; padding:15px 0; border-top:1px solid var(--border);">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="display:flex; flex-direction:column;">
+                            <span style="font-weight:700; color:var(--dark); font-size:14px;">${translateType(item.type)}</span>
+                            <span style="font-size:11px; color:var(--gray); font-weight:600;">Narxi: ${formatMoney(unitPrice)}</span>
+                        </div>
+                        <button style="color:var(--danger); border:none; background:var(--bg); width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center;" onclick="removeItem(${gIdx}, ${iIdx})"><i class="fas fa-trash-alt" style="font-size:12px;"></i></button>
+                    </div>
+                    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                        <div class="stepper-control">
+                            <button class="stepper-btn" onclick="updateItemVal(${gIdx}, ${iIdx}, 'count', -1)">-</button>
+                            <span class="stepper-val">${item.count || 0}</span>
+                            <button class="stepper-btn" onclick="updateItemVal(${gIdx}, ${iIdx}, 'count', 1)">+</button>
+                        </div>
+                        ${!isFixed ? `
+                            <div style="display:flex; align-items:center; gap:8px; background:var(--bg); padding:6px 12px; border-radius:12px; border:1px solid var(--border);">
+                                <input type="number" value="${item.type === 'meter' ? item.value : item.area}" step="0.1" 
+                                    style="width:65px; border:none; background:none; font-weight:800; font-size:16px; text-align:center; color:var(--primary);"
+                                    oninput="updateItemVal(${gIdx}, ${iIdx}, '${item.type === 'meter' ? 'value' : 'area'}', this.value, true)">
+                                <span style="font-weight:700; color:var(--gray); font-size:12px;">${item.type === 'sqm' ? 'm²' : (item.type === 'KG' ? 'kg' : 'm')}</span>
+                            </div>
+                        ` : ''}
+                        <div style="font-weight:800; color:var(--success); font-size:15px; margin-left:auto;">${formatMoney(itemTotal)}</div>
+                    </div>
+                </div>
+            `;
+        });
+        card.innerHTML = `<div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;"><div style="width:40px; height:40px; background:var(--bg); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px;">${group.emoji || '📦'}</div><span style="font-weight:800; font-size:18px; color:var(--dark);">${group.name}</span></div>${itemsHtml}`;
         container.appendChild(card);
     });
     updateTotals();
 }
 
-function updateItem(gIdx, iIdx, field, val) {
+function updateItemVal(gIdx, iIdx, field, delta, isDirect = false) {
     const item = refinedProducts[gIdx].items[iIdx];
-    item[field] = parseFloat(val) || 0;
-    updateTotals();
+    if (isDirect) item[field] = parseFloat(delta) || 0;
+    else { item[field] = (item[field] || 0) + delta; if (item[field] < 0) item[field] = 0; }
+    renderProducts();
 }
 
 function removeItem(gIdx, iIdx) {
     refinedProducts[gIdx].items.splice(iIdx, 1);
-    if (refinedProducts[gIdx].items.length === 0) {
-        refinedProducts.splice(gIdx, 1);
-    }
-    renderProducts();
-}
-
-function removeGroup(idx) {
-    refinedProducts.splice(idx, 1);
+    if (refinedProducts[gIdx].items.length === 0) refinedProducts.splice(gIdx, 1);
     renderProducts();
 }
 
 function updateTotals() {
-    let totalArea = 0;
-    let totalPrice = 0;
-    let totalCount = 0;
-    
-    refinedProducts.forEach((group) => {
+    let totalCount = 0, totalArea = 0, totalPrice = 0;
+    const summaryCards = document.getElementById('summary-cards');
+    if (!summaryCards) return;
+    summaryCards.innerHTML = '';
+    refinedProducts.forEach(group => {
+        let groupPrice = 0;
         group.items.forEach(item => {
-            if (item.type === 'sqm') {
-                totalArea += item.area;
-                totalPrice += item.area * item.price;
-                totalCount += 1;
-            } else {
-                totalCount += item.count;
-                totalPrice += item.count * item.price;
-                // For non-sqm, we don't necessarily add to "area" unless it's KG
-                if (item.type === 'KG') {
-                    totalArea += item.count; // Treat KG as area for display
-                }
-            }
+            const count = item.count || 0;
+            const price = item.price || 0;
+            let itemTotal = 0;
+            if (item.type === 'sqm' || item.type === 'KG') { const val = (item.area || 0); itemTotal = val * price; totalArea += val; }
+            else if (item.type === 'meter') { itemTotal = (item.value || 0) * price; }
+            else { itemTotal = count * price; }
+            groupPrice += itemTotal; totalCount += count; totalPrice += itemTotal;
         });
+        summaryCards.innerHTML += `<div class="summary-small-card"><div class="summary-label">${group.emoji} ${group.name}</div><div class="summary-value">${formatMoney(groupPrice)}</div></div>`;
     });
-    
-    const elCount = document.getElementById('total-count');
-    const elArea = document.getElementById('total-area');
-    const elPrice = document.getElementById('total-price');
-
-    if (elCount) elCount.textContent = totalCount + ' ta';
-    if (elArea) elArea.textContent = totalArea.toFixed(1);
-    if (elPrice) elPrice.textContent = formatMoney(totalPrice);
-}
-
-function getGPS() {
-    if (!navigator.geolocation) { showToast('❌ GPS qo\'llanilmadi', 'error'); return; }
-    showToast('⌛ Lokatsiya olinmoqda...', 'info');
-    navigator.geolocation.getCurrentPosition(pos => {
-        const coords = `${pos.coords.latitude.toFixed(6)},${pos.coords.longitude.toFixed(6)}`;
-        document.getElementById('refine-gps').value = coords;
-        showToast('✅ Lokatsiya olingandi', 'success');
-    }, err => {
-        showToast('❌ GPS xatosi: ' + err.message, 'error');
-    });
+    document.getElementById('total-price').textContent = formatMoney(totalPrice);
 }
 
 function saveRefinedOrder() {
-    if (refinedProducts.length === 0) { showToast('❌ Kamida bitta mahsulot qo\'shing', 'error'); return; }
-    
-    let totalArea = 0;
-    let totalPrice = 0;
-    
-    refinedProducts.forEach((group) => {
-        group.items.forEach(item => {
-            if (item.type === 'sqm') {
-                totalArea += item.area;
-                totalPrice += item.area * item.price;
-            } else {
-                totalPrice += item.count * item.price;
-                if (item.type === 'KG') totalArea += item.count;
-            }
-        });
-    });
-
-    const gps = document.getElementById('refine-gps').value;
-
-    const data = {
-        product_items: JSON.stringify(refinedProducts),
-        total_area: totalArea,
-        price: totalPrice,
-        gps_coords: gps,
-        status: 'ready_to_wash'
-    };
-
+    if (refinedProducts.length === 0) { showToast('❌ Mahsulot qo\'shing', 'error'); return; }
+    let totalArea = 0, totalPrice = 0;
+    refinedProducts.forEach(g => g.items.forEach(item => {
+        const price = item.price || 0;
+        if (item.type === 'sqm' || item.type === 'KG') { totalArea += (item.area || 0); totalPrice += (item.area || 0) * price; }
+        else { totalPrice += (item.count || 0) * price; }
+    }));
+    const data = { product_items: JSON.stringify(refinedProducts), total_area: totalArea.toFixed(1), price: totalPrice, gps_coords: document.getElementById('refine-gps').value, status: 'ready_to_wash' };
     supabaseFetch('PATCH', `orders?id=eq.${currentOrder.id}`, data, err => {
-        if (err) { showToast('❌ Xato: ' + err, 'error'); return; }
-        showToast('✅ Saqlandi va Yuvishga tayyorlandi!', 'success');
-        switchPage('home');
-        loadOrders();
+        if (err) showToast('❌ Xato: ' + err, 'error');
+        else { showToast('✅ Saqlandi!', 'success'); switchPage('home'); loadOrders(); }
     });
 }
 
 function openDeliveryDetails(order) {
-    const modal = document.getElementById('detailsModal');
-    const content = document.getElementById('detailsContent');
-    if (!content) return;
-
     const sc = STATUS_CFG[order.status] || STATUS_CFG.new;
-    const hasGPS = order.gpsCoords && String(order.gpsCoords).length > 5;
-
-    let itemsHtml = '';
-    if (Array.isArray(order.productItems)) {
-        order.productItems.forEach(group => {
-            const items = group.items || [{
-                type: group.type || 'sqm',
-                area: group.area || 0,
-                count: group.count || 0,
-                price: group.price || 0
-            }];
-
-            itemsHtml += `
-                <div style="margin-bottom:10px; padding:10px; background:#fff; border-radius:10px;">
-                    <div style="font-weight:700; margin-bottom:5px;">${group.emoji || '📦'} ${group.name}</div>
-                    ${items.map(item => `
-                        <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--gray);">
-                            <span>${item.type}: ${item.type === 'sqm' ? (item.area || 0).toFixed(2) + ' m²' : (item.count || 0) + ' ta'}</span>
-                            <span>${formatMoney(item.type === 'sqm' ? (item.area || 0) * (item.price || 0) : (item.count || 0) * (item.price || 0))}</span>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        });
-    }
-
-    content.innerHTML = `
-        <div class="det-header-card" style="background:${sc.bg};color:${sc.color};padding:20px;border-radius:20px;margin-bottom:20px;">
-            <div style="font-size:22px;font-weight:800;">#${order.displayId} - ${sc.label}</div>
-            <div style="font-weight:600;margin-top:5px; font-size:18px;">👤 ${order.customerName}</div>
-            <div style="font-weight:700;color:var(--primary); font-size:16px;">📞 ${order.phone}</div>
-        </div>
-        <div class="det-info-grid">
-            <div class="det-info-card" style="grid-column: 1/-1;">
-                <div class="det-info-label">📍 Manzil</div>
-                <div class="det-info-val" style="font-size:16px;">${order.location}</div>
-            </div>
-            <div class="det-info-card" style="grid-column: 1/-1;">
-                <div class="det-info-label">📅 Qabul qilingan vaqt</div>
-                <div class="det-info-val" style="font-size:14px;">${formatDateTime(order.createdAt)}</div>
-            </div>
-            ${hasGPS ? `
-            <div class="det-info-card" style="grid-column: 1/-1; background:#e3f2fd;">
-                <div class="det-info-label">🌍 GPS Koordinatalar</div>
-                <div class="det-info-val" style="font-size:12px; color:#1976d2;">${order.gpsCoords}</div>
-            </div>` : ''}
-            <div class="det-info-card">
-                <div class="det-info-label">💰 Summa</div>
-                <div class="det-info-val" style="color:var(--success); font-size:18px;">${formatMoney(order.price)}</div>
-            </div>
-            <div class="det-info-card">
-                <div class="det-info-label">📏 Jami hajm</div>
-                <div class="det-info-val">${order.totalArea}</div>
-            </div>
-        </div>
-        <div style="margin-top:20px; padding:15px; background:var(--light-secondary); border-radius:15px;">
-            <div style="font-weight:700; margin-bottom:10px; color:var(--primary);">📦 Mahsulotlar:</div>
-            ${itemsHtml || '<div style="color:var(--gray);">Ro\'yxat bo\'sh</div>'}
-        </div>
-    `;
-
+    const content = document.getElementById('detailsContent');
+    content.innerHTML = `<div class="det-header-card" style="background:${sc.bg};color:${sc.color};padding:20px;border-radius:20px;margin-bottom:20px;"><div style="font-size:24px;font-weight:900;">#${order.displayId}</div><div style="font-weight:700;margin-top:10px;">👤 ${order.customerName}</div><div style="font-weight:800;color:var(--primary);">${order.phone}</div></div><div class="det-info-grid"><div class="det-info-card" style="grid-column: 1/-1;"><div class="det-info-label">📍 Manzil</div><div class="det-info-val">${order.location}</div></div><div class="det-info-card"><div class="det-info-label">💰 Summa</div><div class="det-info-val" style="color:var(--success);">${formatMoney(order.price)}</div></div><div class="det-info-card"><div class="det-info-label">📏 Hajm</div><div class="det-info-val">${order.totalArea}</div></div></div>`;
     const nav = document.getElementById('detailsNavigation');
-    if (nav) {
-        nav.innerHTML = '';
-        
-        const callBtn = document.createElement('button');
-        callBtn.className = 'det-nav-btn det-nav-call';
-        callBtn.innerHTML = '<i class="fas fa-phone"></i>';
-        callBtn.onclick = () => window.location.href = `tel:${order.phone}`;
-        nav.appendChild(callBtn);
-
-        if (hasGPS) {
-            const routeBtn = document.createElement('button');
-            routeBtn.className = 'det-nav-btn det-nav-route';
-            routeBtn.innerHTML = '<i class="fas fa-route"></i> Yo\'lga chiqish';
-            routeBtn.onclick = () => {
-                window.open(`https://www.google.com/maps/dir/?api=1&destination=${order.gpsCoords}`, '_blank');
-            };
-            nav.appendChild(routeBtn);
-        }
-
-        if (order.status === 'new' || order.status === 'active') {
-            const refBtn = document.createElement('button');
-            refBtn.className = 'det-nav-btn';
-            refBtn.style.background = 'var(--warning)';
-            refBtn.innerHTML = '<i class="fas fa-edit"></i> Aniqlashtirish';
-            refBtn.onclick = () => { closeDetailsModal(); startRefining(order); };
-            nav.appendChild(refBtn);
-        }
-
-        if (order.status === 'ready') {
-            const doneBtn = document.createElement('button');
-            doneBtn.className = 'det-nav-btn';
-            doneBtn.style.background = 'var(--success)';
-            doneBtn.innerHTML = '<i class="fas fa-truck"></i> Yetkazildi';
-            doneBtn.onclick = () => markAsDone(order.id);
-            nav.appendChild(doneBtn);
-        }
+    nav.innerHTML = `<button class="det-nav-btn det-nav-call" onclick="window.location.href='tel:${order.phone}'"><i class="fas fa-phone"></i></button>`;
+    if (order.status === 'new' || order.status === 'active') {
+        const btn = document.createElement('button'); btn.className = 'det-nav-btn'; btn.style.background = 'var(--warning)'; btn.style.color = 'white';
+        btn.innerHTML = 'Aniqlashtirish'; btn.onclick = () => { closeDetailsModal(); startRefining(order); };
+        nav.appendChild(btn);
     }
-
-    modal.classList.add('show');
-}
-
-function updateOrderStatus(id, newStatus) {
-    const order = orders.find(o => o.id == id);
-    if (order.status === 'done') {
-        showToast('❌ Yetkazildi holatidagi buyurtmalarni o\'zgartirib bo\'lmaydi', 'error');
-        return;
+    if (order.status === 'ready') {
+        const btn = document.createElement('button'); btn.className = 'det-nav-btn'; btn.style.background = 'var(--success)'; btn.style.color = 'white';
+        btn.innerHTML = 'Yetkazildi'; btn.onclick = () => markAsDone(order.id);
+        nav.appendChild(btn);
     }
-    if (!confirm('Holatni o\'zgartirmoqchimisiz?')) return;
-    supabaseFetch('PATCH', `orders?id=eq.${id}`, { status: newStatus }, err => {
-        if (err) { showToast('❌ Xato: ' + err, 'error'); return; }
-        showToast('✅ Holat yangilandi!', 'success');
-        closeDetailsModal();
-        loadOrders();
-    });
+    document.getElementById('detailsModal').classList.add('show');
 }
 
 function markAsDone(id) {
-    const order = orders.find(o => o.id == id);
-    if (order.status === 'done') {
-        showToast('❌ Ushbu buyurtma allaqachon yetkazilgan', 'error');
-        return;
-    }
     if (!confirm('Buyurtma yetkazildimi?')) return;
     supabaseFetch('PATCH', `orders?id=eq.${id}`, { status: 'done' }, err => {
-        if (err) { showToast('❌ Xato: ' + err, 'error'); return; }
-        showToast('✅ Buyurtma yakunlandi!', 'success');
-        closeDetailsModal();
-        loadOrders();
+        if (err) showToast('❌ Xato: ' + err, 'error');
+        else { showToast('✅ Yakunlandi!', 'success'); closeDetailsModal(); loadOrders(); }
     });
 }
 
-function switchPage(page) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    const el = document.getElementById(`${page}Page`);
-    if (el) el.classList.add('active');
-}
-function setFilter(btn, filter) {
-    currentFilter = filter;
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    btn.classList.add('active');
-    displayOrders();
-}
+function switchPage(page) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(`${page}Page`).classList.add('active'); }
+function setFilter(btn, filter) { currentFilter = filter; document.querySelectorAll('.chip').forEach(c => c.classList.remove('active')); btn.classList.add('active'); displayOrders(); }
 function closeProductModal() { document.getElementById('productModal').classList.remove('show'); }
 function closeDetailsModal() { document.getElementById('detailsModal').classList.remove('show'); }
-function hideLoading() { 
-    const el = document.getElementById('loadingScreen');
-    if (el) el.classList.add('hide'); 
-}
-function updateDateTime() {
-    const el = document.getElementById('currentDate');
-    if (el) el.textContent = new Date().toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long' });
+function backToCatalog() { document.getElementById('catalogSection').style.display='block'; document.getElementById('refineSection').style.display='none'; }
+function hideLoading() { document.getElementById('loadingScreen').classList.add('hide'); }
+function updateDateTime() { const el = document.getElementById('currentDate'); if (el) el.textContent = new Date().toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long' }); }
+function getGPS() {
+    if (!navigator.geolocation) { showToast('❌ GPS yo\'q', 'error'); return; }
+    navigator.geolocation.getCurrentPosition(pos => { document.getElementById('refine-gps').value = `${pos.coords.latitude.toFixed(6)},${pos.coords.longitude.toFixed(6)}`; }, err => showToast('❌ Xato: ' + err.message, 'error'));
 }
 function startAutoRefresh() { setInterval(loadOrders, 20000); }

@@ -73,12 +73,22 @@ function makeOrderCard(order) {
                 ${sc.emoji} ${sc.label}
             </span>
         </div>
-        <div class="order-phone">👤 ${order.customerName || 'Noma\'lum'}</div>
-        <div class="order-phone">📞 ${order.phone}</div>
-        <div style="font-size:11px; color:var(--gray); margin-top:5px;"><i class="far fa-clock"></i> ${formatDateTime(order.createdAt)}</div>
+        <div class="order-phone">
+            <i class="fas fa-user-circle" style="color:var(--primary); font-size:20px;"></i>
+            <span>${order.customerName || 'Noma\'lum'}</span>
+        </div>
+        <div style="font-weight:700; color:var(--primary); margin-bottom:4px; font-size:14px;">
+            <i class="fas fa-phone-alt" style="font-size:12px;"></i> ${order.phone}
+        </div>
+        
+        ${getOrderSummaryHtml(order.productItems)}
+
         <div class="order-details">
-            <span>📍 ${order.location}</span>
-            <span>💰 ${formatMoney(order.price)}</span>
+            <span><i class="fas fa-map-marker-alt"></i> ${order.location}</span>
+            <span style="font-weight:800; color:var(--success); font-size:15px;">${formatMoney(order.price)}</span>
+        </div>
+        <div style="font-size:10px; color:var(--gray); margin-top:8px; display:flex; align-items:center; gap:4px;">
+            <i class="far fa-clock"></i> ${formatDateTime(order.createdAt)}
         </div>
     `;
     div.onclick = () => openDetailsModal(order);
@@ -86,10 +96,13 @@ function makeOrderCard(order) {
 }
 
 function switchPage(page) {
-    // Modal'ni o'chir (agar ochiq bo'lsa)
+    // Modal va boshqa overlaylarni to'liq yopish
     const modal = document.getElementById('detailsModal');
-    if (modal && modal.classList.contains('show')) {
+    if (modal) {
         modal.classList.remove('show');
+        // CSS animatsiya tugashini kutmasdan pointer-events'ni o'chiradi
+        modal.style.pointerEvents = 'none';
+        setTimeout(() => { modal.style.pointerEvents = ''; }, 300);
     }
     
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -189,9 +202,9 @@ function openDetailsModal(order) {
                     <div style="margin-bottom:10px; padding:10px; background:#fff; border-radius:10px;">
                         <div style="font-weight:700; margin-bottom:5px;">${group.emoji || '📦'} ${group.name}</div>
                         ${group.items.map(item => `
-                            <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--gray);">
-                                <span>${item.type}: ${item.type === 'sqm' ? item.area.toFixed(2) + ' m²' : item.count + ' ta'}</span>
-                                <span>${formatMoney(item.type === 'sqm' ? item.area * item.price : item.count * item.price)}</span>
+                            <div style="display:flex; justify-content:space-between; font-size:14px; color:var(--dark); margin-bottom:4px;">
+                                <span>• ${translateType(item.type)}: ${item.count || 1} ta ${item.type === 'sqm' ? '(' + (item.area || 0).toFixed(2) + ' m²)' : (item.type === 'KG' ? '(' + (item.area || 0).toFixed(1) + ' kg)' : (item.type === 'meter' ? '(' + (item.value || 0).toFixed(1) + ' m)' : ''))}</span>
+                                <span style="font-weight:700;">${formatMoney(item.type === 'sqm' || item.type === 'KG' ? (item.area || 0) * (item.price || 0) : (item.type === 'meter' ? (item.value || 0) * (item.price || 0) : (item.count || 0) * (item.price || 0)))}</span>
                             </div>
                         `).join('')}
                     </div>
