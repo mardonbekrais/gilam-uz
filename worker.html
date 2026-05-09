@@ -15,20 +15,22 @@
             margin-top: 20px;
         }
         .worker-btn {
-            height: 60px;
-            border-radius: 15px;
+            height: 56px;
+            border-radius: 16px;
             border: none;
-            font-size: 18px;
-            font-weight: 800;
+            font-size: 16px;
+            font-weight: 700;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            transition: all 0.2s;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
             color: white;
+            padding: 0 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        .worker-btn:active { transform: scale(0.98); }
+        .worker-btn:active { transform: scale(0.96); }
         .product-item-card {
             background: #f8f9fa;
             padding: 12px;

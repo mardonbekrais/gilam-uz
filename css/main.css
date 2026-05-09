@@ -7,32 +7,51 @@
 }
 
 :root {
+    /* Colors */
     --primary: #667eea;
-    --primary-light: #8b9ef5;
     --primary-dark: #5a67d8;
     --secondary: #764ba2;
-    --secondary-light: #9b6bc2;
     --success: #4caf50;
-    --success-light: #81c784;
-    --warning: #ff9800;
-    --warning-light: #ffb74d;
     --danger: #f44336;
-    --danger-light: #ef5350;
-    --info: #2196f3;
-    --info-light: #64b5f6;
     --dark: #1a202c;
-    --dark-secondary: #2d3748;
-    --light: #f7fafc;
-    --light-secondary: #edf2f7;
     --gray: #a0aec0;
-    --gray-light: #cbd5e0;
     --border: #e2e8f0;
     --bg: #f5f7fa;
     --white: #ffffff;
-    --shadow: 0 2px 8px rgba(0,0,0,0.08);
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
-    --shadow-lg: 0 8px 20px rgba(0,0,0,0.15);
+    
+    /* Responsive Spacing & Layout */
+    --padding-mobile: 16px;
+    --padding-desktop: 24px;
+    --radius-sm: 12px;
+    --radius-md: 16px;
+    --radius-lg: 20px;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
+
+/* Base Responsive Container */
+.container {
+    width: 100%;
+    margin: 0 auto;
+    padding-left: var(--padding-mobile);
+    padding-right: var(--padding-mobile);
+}
+
+@media (min-width: 1024px) {
+    .container {
+        max-width: 1200px;
+        padding-left: var(--padding-desktop);
+        padding-right: var(--padding-desktop);
+    }
+}
+
+/* Utilities */
+.card {
+    background: var(--white);
+    border-radius: var(--radius-md);
+    padding: var(--padding-mobile);
+    box-shadow: var(--shadow);
+}
+
 
 html {
     scroll-behavior: smooth;
@@ -1996,14 +2015,5 @@ button {
     to {
         opacity: 1;
         transform: translateY(0);
-    }
-}
-
-@keyframes fadeOutAnimation {
-    from {
-        opacity: 1;
-    }
-    to {
-        opacity: 0;
     }
 }
