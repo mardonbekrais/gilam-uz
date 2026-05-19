@@ -3,234 +3,1114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gilam Zakaz | Kirish</title>
+    <title>Admin Panel | Gilam Zakaz</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/admin_custom.css">
     <style>
-        :root {
-            --glass-bg: rgba(255, 255, 255, 0.9);
-            --glass-border: rgba(255, 255, 255, 0.2);
+        .admin-card {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
         }
-        
-        body {
-            display: flex;
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 40px 20px;
-            background: #f0f2f5;
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(102, 126, 234, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(118, 75, 162, 0.15) 0px, transparent 50%);
-            min-height: 100vh;
-            overflow-y: auto;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .form-field {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            font-size: 15px;
+            margin-bottom: 12px;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: 0.3s;
+        }
+
+        .stat-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); border-color: var(--primary); }
+        .stat-label { font-size: 14px; color: var(--gray); font-weight: 600; margin-bottom: 8px; }
+        .stat-value { font-size: 24px; font-weight: 800; color: var(--dark); }
+
+        /* =================== TABLE =================== */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table th {
+            background: var(--light-secondary);
+            font-weight: 700;
+            color: var(--gray);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .table-container {
+            border-radius: 20px;
+            background: var(--white);
+            box-shadow: var(--shadow);
+            overflow-x: auto;
+            margin-bottom: 25px;
+            border: 1px solid var(--border);
             -webkit-overflow-scrolling: touch;
         }
 
-        /* Orqa fondagi animatsiya elementlari */
-        .bg-shapes {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            overflow: hidden;
-        }
-        .shape {
-            position: absolute;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            filter: blur(80px);
-            opacity: 0.1;
-            border-radius: 50%;
-            animation: move 20s infinite alternate;
-        }
-        .shape-1 { width: 400px; height: 400px; top: -100px; right: -100px; }
-        .shape-2 { width: 300px; height: 300px; bottom: -50px; left: -50px; animation-delay: -5s; }
-
-        @keyframes move {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(50px, 100px) scale(1.2); }
-        }
-
-        .entry-container {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 40px;
-            border-radius: 35px;
-            width: 100%;
-            max-width: 440px;
-            text-align: center;
-            box-shadow: 
-                0 20px 40px rgba(0,0,0,0.05),
-                inset 0 0 0 1px var(--glass-border);
-            animation: fadeIn 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .logo-wrapper {
-            position: relative;
-            display: inline-block;
+        /* =================== FILTER CARD =================== */
+        .filter-card {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
             margin-bottom: 25px;
-        }
-        .logo-icon {
-            font-size: 70px;
-            filter: drop-shadow(0 10px 15px rgba(102, 126, 234, 0.3));
-            animation: float 4s ease-in-out infinite;
-        }
-        .logo-ring {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 120%; height: 120%;
-            border: 2px dashed var(--primary);
-            border-radius: 50%;
-            opacity: 0.2;
-            animation: rotate 15s linear infinite;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        @keyframes rotate {
-            from { transform: translate(-50%, -50%) rotate(0deg); }
-            to { transform: translate(-50%, -50%) rotate(360deg); }
+        .filter-search {
+            width: 100%;
+            margin: 0;
         }
 
-        h1 { 
-            margin-bottom: 8px; 
-            font-size: 32px;
-            font-weight: 900; 
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.5px;
-        }
-        p { 
-            color: var(--gray); 
-            margin-bottom: 35px; 
-            font-size: 15px; 
-            line-height: 1.5;
-            padding: 0 10px;
+        .filter-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            width: 100%;
         }
 
-        .role-buttons {
-            display: grid;
-            gap: 16px;
+        .filter-select {
+            flex: 1 1 calc(33% - 8px);
+            min-width: 140px;
+            padding: 12px 14px;
+            border-radius: 15px;
+            border: 2px solid var(--bg);
+            outline: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            background: var(--bg);
+            color: var(--dark);
+            font-family: inherit;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
         }
-        .role-btn {
+
+        .filter-select:focus {
+            border-color: var(--primary);
+            background: var(--white);
+        }
+
+        .filter-reset-btn {
+            flex: 0 0 auto;
+            padding: 0 20px;
+            height: 48px;
+            background: var(--bg);
+            border: none;
+            border-radius: 15px;
+            color: var(--gray);
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 16px;
+            transition: 0.2s;
             display: flex;
             align-items: center;
-            gap: 18px;
-            padding: 18px 24px;
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 22px;
-            text-decoration: none;
-            color: var(--dark);
-            font-weight: 700;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            justify-content: center;
+        }
+
+        .filter-reset-btn:hover { background: var(--light-secondary); color: var(--primary); }
+
+        /* =================== SEARCH BOX =================== */
+        .search-box {
             position: relative;
-            overflow: hidden;
+            display: flex;
+            align-items: center;
+            background: var(--bg);
+            border-radius: 15px;
+            padding: 0 15px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
         }
 
-        .role-btn::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            opacity: 0;
-            transition: opacity 0.4s;
-            z-index: 1;
+        .search-box:focus-within {
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
         }
 
-        .role-btn:hover {
-            transform: scale(1.02);
-            border-color: transparent;
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
-            color: white;
-        }
-        .role-btn:hover::after { opacity: 1; }
+        .search-box i { color: var(--gray); margin-right: 10px; font-size: 16px; }
 
-        .role-btn i { 
-            font-size: 26px; 
-            color: var(--primary); 
-            width: 32px;
-            transition: all 0.4s;
-            z-index: 2;
-        }
-        .role-btn span { z-index: 2; font-size: 16px; }
-        .role-btn .arrow { 
-            margin-left: auto; 
-            font-size: 14px; 
-            opacity: 0.3; 
-            transition: all 0.4s;
-            z-index: 2;
-        }
-
-        .role-btn:hover i, .role-btn:hover .arrow { color: white; opacity: 1; }
-        .role-btn:hover .arrow { transform: translateX(5px); }
-
-        .footer-note {
-            margin-top: 30px;
-            font-size: 12px;
-            color: var(--gray-light);
+        .search-box input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            padding: 12px 0;
+            font-size: 15px;
             font-weight: 500;
+            color: var(--dark);
         }
 
-        @media (max-width: 480px) {
-            .entry-container {
-                padding: 30px 20px;
-                border-radius: 30px;
+        .search-box input::placeholder { color: var(--gray); }
+
+        /* =================== BUTTON ACTION =================== */
+        .btn-action {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-action:active { transform: scale(0.9); }
+
+        /* =================== MODAL =================== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+            padding: 16px;
+        }
+
+        .modal-overlay.show { display: flex; }
+
+        .modal-card {
+            background: var(--white);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            border-radius: 25px;
+            overflow-y: auto;
+            padding: 25px;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            font-size: 18px;
+        }
+
+        /* =================== LOGIN OVERLAY =================== */
+        #loginOverlay {
+            position: fixed;
+            inset: 0;
+            background: #0f172a;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(67, 24, 255, 0.15) 0, transparent 50%),
+                radial-gradient(at 50% 0%, rgba(156, 39, 176, 0.1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(67, 24, 255, 0.15) 0, transparent 50%);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .login-card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 40px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            animation: cardAppear 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes cardAppear {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .pin-dots { display: flex; justify-content: center; gap: 15px; margin: 30px 0; }
+
+        .dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: 0.3s;
+        }
+
+        .dot.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary);
+            transform: scale(1.2);
+        }
+
+        .numpad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .num-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.05);
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+            padding: 20px 0;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .num-btn:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+        .num-btn:active { transform: scale(0.9); background: var(--primary); }
+        .num-btn.special { background: transparent; border: none; font-size: 18px; color: rgba(255,255,255,0.5); }
+        .num-btn.special:hover { color: white; }
+
+        #admin-pass:focus { border-color: var(--primary) !important; box-shadow: 0 0 0 4px rgba(67, 24, 255, 0.1); }
+
+        .error-shake { animation: shake 0.4s; }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25%       { transform: translateX(-10px); }
+            75%       { transform: translateX(10px); }
+        }
+
+        /* =================== CUSTOM SCROLLBAR =================== */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--gray-light); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--gray); }
+
+        /* ===========================================
+           RESPONSIVE — 900px (tablet & mobile)
+        =========================================== */
+        @media (max-width: 900px) {
+
+            /* --- Sidebar collapses to off-canvas drawer --- */
+            .admin-grid {
+                grid-template-columns: 1fr;
             }
-            h1 { font-size: 28px; }
-            .logo-icon { font-size: 60px; }
+
+            .sidebar {
+                position: fixed;
+                left: calc(-1 * var(--sidebar-width));
+                width: var(--sidebar-width);
+                height: 100vh;
+                box-shadow: 20px 0 50px rgba(0,0,0,0.1);
+            }
+
+            .sidebar.show { left: 0; }
+
+            #sidebarClose { display: flex !important; }
+
+            /* --- Mobile header becomes visible --- */
+            .mobile-header { display: flex; }
+
+            /* --- Content padding reduced --- */
+            .admin-content { padding: 20px; }
+
+            /* --- Dashboard stats row: 3 → 2 columns --- */
+            .dashboard-stats-row {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            /* --- Status stats: 4 → 2 columns --- */
+            .status-stats-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            /* --- Prices grid: 2 → 1 column --- */
+            .prices-grid {
+                grid-template-columns: 1fr !important;
+                gap: 20px !important;
+            }
+        }
+
+        /* ===========================================
+           RESPONSIVE — 768px (mobile)
+        =========================================== */
+        @media (max-width: 768px) {
+
+            /* --- Content padding --- */
+            .admin-content { padding: 15px; }
+
+            /* --- Page title --- */
+            .page-title { font-size: 22px; margin-bottom: 20px; }
+
+            /* --- Stat grid: 4 → 2 columns --- */
+            .stat-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px; }
+
+            /* --- Dashboard stats row: → 1 column --- */
+            .dashboard-stats-row {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* --- Status stats: → 2 columns --- */
+            .status-stats-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            /* --- Admin card padding --- */
+            .admin-card { padding: 15px !important; }
+
+            /* --- Filter section: stack vertically --- */
+            .filter-controls {
+                flex-direction: column !important;
+                gap: 8px !important;
+            }
+
+            .filter-select {
+                width: 100% !important;
+                min-width: 0 !important;
+                max-width: 100% !important;
+                flex: none !important;
+                box-sizing: border-box !important;
+            }
+
+            .filter-reset-btn {
+                width: 100% !important;
+                min-width: 0 !important;
+                flex: none !important;
+                padding: 12px !important;
+                box-sizing: border-box !important;
+            }
+
+            /* --- Search box full width --- */
+            .filter-search {
+                width: 100% !important;
+                min-width: 0 !important;
+                box-sizing: border-box !important;
+            }
+
+            /* --- Responsive table: rows become cards --- */
+            .data-table.responsive-table {
+                min-width: 0 !important;
+                width: 100% !important;
+            }
+
+            .data-table.responsive-table thead {
+                display: none;
+            }
+
+            .data-table.responsive-table,
+            .data-table.responsive-table tbody,
+            .data-table.responsive-table tr,
+            .data-table.responsive-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .data-table.responsive-table tr {
+                margin-bottom: 14px;
+                border: 1px solid var(--border);
+                border-radius: 16px;
+                padding: 12px;
+                background: var(--white);
+                box-shadow: var(--shadow);
+            }
+
+            .data-table.responsive-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 9px 0;
+                border: none;
+                border-bottom: 1px solid var(--border);
+                font-size: 14px;
+                text-align: right;
+            }
+
+            .data-table.responsive-table td:last-child {
+                border-bottom: none;
+                padding-top: 12px;
+                margin-top: 4px;
+            }
+
+            /* Label injected from data-label attribute */
+            .data-table.responsive-table td[data-label]::before {
+                content: attr(data-label);
+                font-weight: 700;
+                color: var(--gray);
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                flex-shrink: 0;
+                margin-right: 10px;
+                text-align: left;
+            }
+
+            /* Cells without data-label (action column) — right-aligned */
+            .data-table.responsive-table td:not([data-label]) {
+                display: flex !important;
+                justify-content: flex-end;
+                border-bottom: none;
+            }
+
+            /* --- Compact card: hide Telefon, Manzil, action buttons --- */
+            .data-table.responsive-table td[data-label="Telefon"],
+            .data-table.responsive-table td[data-label="Manzil"],
+            .data-table.responsive-table td:not([data-label]) {
+                display: none;
+            }
+
+            /* Remove border from last visible td */
+            .data-table.responsive-table td[data-label="Holat"] {
+                border-bottom: none;
+                padding-bottom: 4px;
+            }
+
+            /* "Tap for details" hint at bottom of each card */
+            .data-table.responsive-table tr::after {
+                content: "Batafsil uchun bosing  →";
+                display: block;
+                text-align: center;
+                font-size: 11px;
+                color: var(--gray);
+                padding-top: 8px;
+                margin-top: 6px;
+                border-top: 1px dashed var(--border);
+                letter-spacing: 0.3px;
+            }
+
+            /* Table container: no horizontal scroll needed in card mode */
+            .table-container {
+                overflow-x: visible;
+                background: transparent;
+                box-shadow: none;
+                border: none;
+                border-radius: 0;
+                padding: 0;
+            }
+
+            /* --- Modal responsive --- */
+            .modal-card {
+                width: 95% !important;
+                max-width: 100% !important;
+                padding: 20px !important;
+                border-radius: 20px !important;
+            }
+
+            .modal-info-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* --- Login card --- */
+            .login-card {
+                padding: 30px 20px !important;
+                max-width: 360px !important;
+                border-radius: 32px !important;
+            }
+
+            .login-card h2 { font-size: 22px !important; }
+            .login-card p  { font-size: 13px !important; }
+
+            .numpad { gap: 12px !important; }
+
+            .num-btn {
+                padding: 16px 0 !important;
+                font-size: 20px !important;
+            }
+        }
+
+        /* ===========================================
+           RESPONSIVE — 500px (small mobile)
+        =========================================== */
+        @media (max-width: 500px) {
+
+            /* --- Content --- */
+            .admin-content { padding: 12px; }
+
+            /* --- Page title --- */
+            .page-title { font-size: 20px; margin-bottom: 16px; }
+
+            /* --- Stat grid: → 1 column --- */
+            .stat-grid { grid-template-columns: 1fr !important; gap: 10px; }
+
+            .stat-card { padding: 15px; }
+            .stat-value { font-size: 20px; }
+            .stat-label { font-size: 13px; }
+
+            /* --- Sidebar width --- */
+            .sidebar { width: 240px; }
+            .sidebar-item { padding: 10px 12px; font-size: 14px; }
+
+            /* --- Status stats: → 1 column --- */
+            .status-stats-grid {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
+
+            /* --- Mobile header --- */
+            .mobile-header { padding: 12px 15px !important; }
+            .menu-toggle  { width: 36px !important; height: 36px !important; font-size: 20px !important; }
+
+            /* --- Login card --- */
+            .login-card {
+                padding: 25px 15px !important;
+                max-width: 320px !important;
+                border-radius: 28px !important;
+            }
+
+            .login-card h2 { font-size: 20px !important; }
+            .login-card p  { font-size: 12px !important; }
+
+            .numpad { gap: 10px !important; }
+
+            .num-btn {
+                padding: 14px 0 !important;
+                font-size: 18px !important;
+                border-radius: 15px !important;
+            }
+
+            .pin-dots { gap: 12px !important; margin: 20px 0 !important; }
+            .dot { width: 14px !important; height: 14px !important; }
+        }
+
+        /* ===========================================
+           RESPONSIVE — 380px (very small)
+        =========================================== */
+        @media (max-width: 380px) {
+
+            .admin-content { padding: 10px; }
+            .stat-card { padding: 12px; }
+            .stat-value { font-size: 18px; }
+            .page-title { font-size: 18px; }
+
+            .login-card {
+                max-width: 280px !important;
+                padding: 20px 12px !important;
+            }
+
+            .numpad { gap: 8px !important; }
+
+            .num-btn {
+                padding: 12px 0 !important;
+                font-size: 16px !important;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="bg-shapes">
-        <div class="shape shape-1"></div>
-        <div class="shape shape-2"></div>
+    <div id="loginOverlay">
+        <div class="login-card" id="loginCard">
+            <div style="margin-bottom: 10px;">
+                <div style="width: 60px; height: 60px; background: var(--primary); border-radius: 18px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 24px; box-shadow: 0 10px 20px rgba(67, 24, 255, 0.3);">
+                    <i class="fas fa-shield-halved"></i>
+                </div>
+                <h2 style="font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">Admin Panel</h2>
+                <p style="color: rgba(255,255,255,0.5); font-size: 14px; margin-top: 5px;">Kirish uchun 4 xonali PIN kiriting</p>
+            </div>
+
+            <div class="pin-dots">
+                <div class="dot" id="dot-0"></div>
+                <div class="dot" id="dot-1"></div>
+                <div class="dot" id="dot-2"></div>
+                <div class="dot" id="dot-3"></div>
+            </div>
+
+            <div class="numpad">
+                <button class="num-btn" onclick="pressNum(1)">1</button>
+                <button class="num-btn" onclick="pressNum(2)">2</button>
+                <button class="num-btn" onclick="pressNum(3)">3</button>
+                <button class="num-btn" onclick="pressNum(4)">4</button>
+                <button class="num-btn" onclick="pressNum(5)">5</button>
+                <button class="num-btn" onclick="pressNum(6)">6</button>
+                <button class="num-btn" onclick="pressNum(7)">7</button>
+                <button class="num-btn" onclick="pressNum(8)">8</button>
+                <button class="num-btn" onclick="pressNum(9)">9</button>
+                <button class="num-btn special" onclick="clearPin()"><i class="fas fa-rotate-left"></i></button>
+                <button class="num-btn" onclick="pressNum(0)">0</button>
+                <button class="num-btn special" onclick="backspacePin()"><i class="fas fa-backspace"></i></button>
+            </div>
+
+            <div style="margin-top: 30px; font-size: 12px; color: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i class="fas fa-fingerprint"></i> Biometrik himoya faol
+            </div>
+        </div>
     </div>
 
-    <div class="entry-container">
-        <div class="logo-wrapper">
-            <div class="logo-ring"></div>
-            <span class="logo-icon">🧺</span>
-        </div>
-        <h1>Gilam Zakaz</h1>
-        <p>Boshqaruv tizimiga xush kelibsiz. Ishni davom ettirish uchun tizimdagi rolingizni tanlang:</p>
-        
-        <div class="role-buttons">
-            <a href="dispatcher.html" class="role-btn">
-                <i class="fas fa-headset"></i>
-                <span>Dispetcher</span>
-                <i class="fas fa-chevron-right arrow"></i>
-            </a>
-            <a href="worker.html" class="role-btn">
-                <i class="fas fa-tools"></i>
-                <span>Ishchilar</span>
-                <i class="fas fa-chevron-right arrow"></i>
-            </a>
-            <a href="delivery.html" class="role-btn">
-                <i class="fas fa-truck"></i>
-                <span>Dastavchik</span>
-                <i class="fas fa-chevron-right arrow"></i>
-            </a>
-            <a href="admin.html" class="role-btn">
-                <i class="fas fa-user-shield"></i>
-                <span>Admin Panel</span>
-                <i class="fas fa-chevron-right arrow"></i>
-            </a>
-        </div>
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-        <div class="footer-note">
-            © 2026 Gilam Zakaz • v2.0
+    <div class="mobile-header">
+        <div style="font-size:20px; font-weight:800; color:var(--primary);">🧺 Admin</div>
+        <div class="menu-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
         </div>
     </div>
+
+    <div class="admin-grid">
+        <aside class="sidebar" id="sidebar">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-size:24px; font-weight:800; color:var(--primary);">🧺 AdminPanel</div>
+                <div class="menu-toggle" style="display:none; background:none; font-size:20px;" id="sidebarClose" onclick="toggleSidebar()">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="sidebar-item active" onclick="switchAdminTab('dashboard')"><i class="fas fa-chart-line"></i> Boshqaruv</div>
+                <div class="sidebar-item" onclick="switchAdminTab('orders')"><i class="fas fa-list"></i> Barcha buyurtmalar</div>
+                <div class="sidebar-item" onclick="switchAdminTab('products')"><i class="fas fa-boxes-stacked"></i> Mahsulotlar</div>
+                <div class="sidebar-item" onclick="switchAdminTab('prices')"><i class="fas fa-tag"></i> Narxlar sozlamasi</div>
+                <div class="sidebar-item" onclick="logoutAdmin()"><i class="fas fa-sign-out-alt"></i> Chiqish</div>
+            </nav>
+        </aside>
+
+        <main class="admin-content">
+            <!-- ===== DASHBOARD TAB ===== -->
+            <div id="dashboardTab" class="admin-tab">
+                <h1 class="page-title">Statistika</h1>
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Bugun</div>
+                        <div class="stat-value" id="s-today">0 so'm</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Shu hafta</div>
+                        <div class="stat-value" id="s-week">0 so'm</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Shu oy</div>
+                        <div class="stat-value" id="s-month">0 so'm</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Jami buyurtmalar</div>
+                        <div class="stat-value" id="s-total">0</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-stats-row" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px; margin-bottom:30px;">
+                    <div class="admin-card" style="background:var(--white); padding:20px; border-radius:15px; box-shadow:var(--shadow);">
+                        <div style="font-weight:700; font-size:14px; color:var(--gray); margin-bottom:15px; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-calendar-day" style="color:var(--warning);"></i> KUNLIK
+                        </div>
+                        <div style="display:grid; gap:10px; font-size:14px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
+                                <span style="color:var(--gray);">Buyurtmalar soni:</span>
+                                <span style="font-weight:700;" id="daily-count">0</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
+                                <span style="color:var(--gray);">Jami summa:</span>
+                                <span style="font-weight:700;" id="daily-sum">0</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0;">
+                                <span style="color:var(--gray);">O'rtacha:</span>
+                                <span style="font-weight:700;" id="daily-avg">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="admin-card" style="background:var(--white); padding:20px; border-radius:15px; box-shadow:var(--shadow);">
+                        <div style="font-weight:700; font-size:14px; color:var(--gray); margin-bottom:15px; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-calendar-week" style="color:var(--info);"></i> HAFTALIK
+                        </div>
+                        <div style="display:grid; gap:10px; font-size:14px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
+                                <span style="color:var(--gray);">Buyurtmalar soni:</span>
+                                <span style="font-weight:700;" id="weekly-count">0</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
+                                <span style="color:var(--gray);">Jami summa:</span>
+                                <span style="font-weight:700;" id="weekly-sum">0</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0;">
+                                <span style="color:var(--gray);">O'rtacha:</span>
+                                <span style="font-weight:700;" id="weekly-avg">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="admin-card" style="background:var(--white); padding:20px; border-radius:15px; box-shadow:var(--shadow);">
+                        <div style="font-weight:700; font-size:14px; color:var(--gray); margin-bottom:15px; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-calendar" style="color:var(--success);"></i> OYLIK
+                        </div>
+                        <div style="display:grid; gap:10px; font-size:14px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
+                                <span style="color:var(--gray);">Buyurtmalar soni:</span>
+                                <span style="font-weight:700;" id="monthly-count">0</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
+                                <span style="color:var(--gray);">Jami summa:</span>
+                                <span style="font-weight:700;" id="monthly-sum">0</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0;">
+                                <span style="color:var(--gray);">O'rtacha:</span>
+                                <span style="font-weight:700;" id="monthly-avg">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-card" style="background:var(--white); padding:20px; border-radius:15px; box-shadow:var(--shadow);">
+                    <div style="font-weight:700; font-size:14px; color:var(--gray); margin-bottom:15px;"><i class="fas fa-chart-pie"></i> BUYURTMA HOLATLARI</div>
+                    <div class="status-stats-grid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:15px;">
+                        <div style="text-align:center; padding:15px; background:var(--light-secondary); border-radius:12px;">
+                            <div style="font-size:24px; margin-bottom:5px;" id="status-new-emoji">⏳</div>
+                            <div style="font-size:13px; color:var(--gray); margin-bottom:8px;">Kutilmoqda</div>
+                            <div style="font-weight:700; font-size:18px; color:var(--warning);" id="status-new-count">0</div>
+                        </div>
+                        <div style="text-align:center; padding:15px; background:var(--light-secondary); border-radius:12px;">
+                            <div style="font-size:24px; margin-bottom:5px;" id="status-washing-emoji">🧼</div>
+                            <div style="font-size:13px; color:var(--gray); margin-bottom:8px;">Yuvilmoqda</div>
+                            <div style="font-weight:700; font-size:18px; color:var(--info);" id="status-washing-count">0</div>
+                        </div>
+                        <div style="text-align:center; padding:15px; background:var(--light-secondary); border-radius:12px;">
+                            <div style="font-size:24px; margin-bottom:5px;" id="status-ready-emoji">✅</div>
+                            <div style="font-size:13px; color:var(--gray); margin-bottom:8px;">Tayyor</div>
+                            <div style="font-weight:700; font-size:18px; color:var(--success);" id="status-ready-count">0</div>
+                        </div>
+                        <div style="text-align:center; padding:15px; background:var(--light-secondary); border-radius:12px;">
+                            <div style="font-size:24px; margin-bottom:5px;" id="status-done-emoji">🚚</div>
+                            <div style="font-size:13px; color:var(--gray); margin-bottom:8px;">Yetkazildi</div>
+                            <div style="font-weight:700; font-size:18px; color:var(--primary);" id="status-done-count">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== ORDERS TAB ===== -->
+            <div id="ordersTab" class="admin-tab" style="display:none;">
+                <h1 class="page-title">Barcha buyurtmalar</h1>
+                <div class="filter-card">
+                    <div class="search-box filter-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="admin-search-input" placeholder="Ism, telefon yoki ID..." oninput="applyAdminFilters()">
+                    </div>
+
+                    <div class="filter-controls">
+                        <select id="filter-status" class="filter-select" onchange="applyAdminFilters()">
+                            <option value="all">Barcha holatlar</option>
+                            <option value="new">Kutilmoqda (Yangi)</option>
+                            <option value="active">Faollashtirildi</option>
+                            <option value="ready_to_wash">Yuvishga tayyor</option>
+                            <option value="washing">Yuvilmoqda</option>
+                            <option value="packing">Upakovka</option>
+                            <option value="ready">Tayyor (Dastavkaga)</option>
+                            <option value="done">Yetkazildi</option>
+                        </select>
+
+                        <select id="filter-sort" class="filter-select" onchange="applyAdminFilters()">
+                            <option value="newest">🆕 Yangi birinchi</option>
+                            <option value="oldest">⌛ Eskilar birinchi</option>
+                            <option value="expensive">💰 Qimmatlari birinchi</option>
+                            <option value="cheap">📉 Arzonlari birinchi</option>
+                        </select>
+
+                        <select id="filter-date" class="filter-select" onchange="applyAdminFilters()">
+                            <option value="all">Barcha vaqtlar</option>
+                            <option value="today">Bugun</option>
+                            <option value="week">Shu hafta</option>
+                            <option value="month">Shu oy</option>
+                        </select>
+
+                        <button class="filter-reset-btn" onclick="resetAdminFilters()">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table responsive-table">
+                        <thead>
+                            <tr>
+                                <th>#ID</th>
+                                <th>Mijoz</th>
+                                <th>Telefon</th>
+                                <th>Manzil</th>
+                                <th>Summa</th>
+                                <th>Holat</th>
+                                <th style="text-align:right;">Amal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminOrdersBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== PRODUCTS TAB ===== -->
+            <div id="productsTab" class="admin-tab" style="display:none;">
+                <h1 class="page-title">Mahsulotlar statistikasi (30 kunlik)</h1>
+                <div class="stat-grid" id="product-stats-summary">
+                    <div class="stat-card">
+                        <div class="stat-label">Jami mahsulotlar</div>
+                        <div class="stat-value" id="p-total-count">0 ta</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Jami maydon</div>
+                        <div class="stat-value" id="p-total-area">0 m²</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Eng ko'p xizmat</div>
+                        <div class="stat-value" id="p-top-product" style="font-size:18px;">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Davr</div>
+                        <div class="stat-value" id="p-period" style="font-size:14px;">—</div>
+                    </div>
+                </div>
+
+                <div class="admin-card" style="background:var(--white); padding:25px; border-radius:20px; box-shadow:var(--shadow); overflow-x:auto;">
+                    <h3 style="margin-bottom:20px;"><i class="fas fa-ranking-star"></i> Mahsulotlar reytingi</h3>
+                    <table class="data-table responsive-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Mahsulot</th>
+                                <th>Soni</th>
+                                <th>Maydoni (m²)</th>
+                                <th>Ulushi (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="product-ranking-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== PRICES TAB ===== -->
+            <div id="pricesTab" class="admin-tab" style="display:none;">
+                <h1 class="page-title">Narxlar va Mahsulotlar</h1>
+                <div class="prices-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <div class="form-group" style="background:var(--white); padding:25px; border-radius:20px; box-shadow:var(--shadow);">
+                        <h3 style="margin-bottom:15px; color:var(--primary);"><i class="fas fa-globe"></i> Umumiy sozlamalar</h3>
+                        <label>Asosiy narx (1 m² uchun)</label>
+                        <input type="number" id="global-price" value="20000" style="margin-bottom:15px; padding:12px; width:100%; border-radius:10px; border:1px solid var(--border);">
+                        <button class="btn-primary" style="width:100%;" onclick="savePrice()">Asosiy narxni saqlash</button>
+                    </div>
+                    
+                    <div class="form-group" style="background:var(--white); padding:25px; border-radius:20px; box-shadow:var(--shadow);">
+                        <h3 style="margin-bottom:15px; color:var(--secondary);"><i class="fas fa-plus-circle"></i> Yangi mahsulot qo'shish</h3>
+                        <div style="display:grid; gap:12px;">
+                            <div style="display:grid; grid-template-columns: 80px 1fr; gap:10px;">
+                                <input type="text" id="new-p-emoji" placeholder="Emoji" class="form-field" style="font-size: 20px; text-align: center;">
+                                <input type="text" id="new-p-name" placeholder="Mahsulot nomi" class="form-field">
+                            </div>
+                            
+                            <div style="padding:15px; background:var(--bg); border-radius:12px;">
+                                <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                                    <input type="checkbox" id="check-fixed" style="width:18px; height:18px;">
+                                    <label for="check-fixed" style="font-weight:700; cursor:pointer;">O'lchamli narxlar (S, M, L)</label>
+                                </div>
+                                <div id="fixed-prices-input" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; display:none;">
+                                    <div>
+                                        <small style="color:var(--gray);">Kichik</small>
+                                        <input type="number" id="new-p-s" placeholder="Narx" class="form-field">
+                                    </div>
+                                    <div>
+                                        <small style="color:var(--gray);">O'rtacha</small>
+                                        <input type="number" id="new-p-m" placeholder="Narx" class="form-field">
+                                    </div>
+                                    <div>
+                                        <small style="color:var(--gray);">Katta</small>
+                                        <input type="number" id="new-p-l" placeholder="Narx" class="form-field">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="padding:15px; background:var(--bg); border-radius:12px;">
+                                <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                                    <input type="checkbox" id="check-sqm" style="width:18px; height:18px;">
+                                    <label for="check-sqm" style="font-weight:700; cursor:pointer;">Kvadrat metr (m²) bo'yicha</label>
+                                </div>
+                                <div id="sqm-price-input" style="display:none;">
+                                    <small style="color:var(--gray);">1 m² narxi</small>
+                                    <input type="number" id="new-p-sqm" placeholder="Narx" style="padding:8px; width:100%; border-radius:8px; border:1px solid var(--border);">
+                                </div>
+                            </div>
+
+                            <div style="padding:15px; background:var(--bg); border-radius:12px;">
+                                <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                                    <input type="checkbox" id="check-kg" style="width:18px; height:18px;">
+                                    <label for="check-kg" style="font-weight:700; cursor:pointer;">Kilogramm (KG) bo'yicha</label>
+                                </div>
+                                <div id="kg-price-input" style="display:none;">
+                                    <small style="color:var(--gray);">1 kg narxi</small>
+                                    <input type="number" id="new-p-kg" placeholder="Narx" style="padding:8px; width:100%; border-radius:8px; border:1px solid var(--border);">
+                                </div>
+                            </div>
+
+                            <div style="padding:15px; background:var(--bg); border-radius:12px;">
+                                <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                                    <input type="checkbox" id="check-meter" style="width:18px; height:18px;">
+                                    <label for="check-meter" style="font-weight:700; cursor:pointer;">Metr (m) bo'yicha</label>
+                                </div>
+                                <div id="meter-price-input" style="display:none;">
+                                    <small style="color:var(--gray);">1 m narxi</small>
+                                    <input type="number" id="new-p-meter" placeholder="Narx" style="padding:8px; width:100%; border-radius:8px; border:1px solid var(--border);">
+                                </div>
+                            </div>
+
+                            <button class="btn-save" style="background:var(--secondary); width:100%; height: 50px;" onclick="addNewProductType()">Katalogga qo'shish</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top:30px; background:var(--white); padding:25px; border-radius:20px; box-shadow:var(--shadow);">
+                    <h3 style="margin-bottom:20px;"><i class="fas fa-boxes-stacked"></i> Mahsulotlar katalogi</h3>
+                    <div class="table-container">
+                        <table class="data-table responsive-table">
+                            <thead>
+                                <tr>
+                                    <th>Emoji</th>
+                                    <th>Nomi</th>
+                                    <th>O'lchamli (Kichik / O'rtacha / Katta)</th>
+                                    <th>Kv. Metr (1 m²)</th>
+                                    <th>KG (1 kg)</th>
+                                    <th>Metr (1 m)</th>
+                                    <th style="text-align:right;">Amal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="product-catalog-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <div id="orderModal" class="modal-overlay">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeOrderModal()">✕</button>
+            <div id="orderModalContent"></div>
+        </div>
+    </div>
+
+    <div id="productEditModal" class="modal-overlay">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeProductEditModal()">✕</button>
+            <h2 style="margin-bottom:20px;"><i class="fas fa-edit"></i> Mahsulotni tahrirlash</h2>
+            <div style="display:grid; gap:15px;">
+                <input type="hidden" id="edit-p-id">
+                <div style="display:grid; grid-template-columns: 80px 1fr; gap:10px;">
+                    <input type="text" id="edit-p-emoji" placeholder="Emoji" style="padding:12px; border-radius:12px; border:1px solid var(--border); font-size: 24px; text-align: center;">
+                    <input type="text" id="edit-p-name" placeholder="Mahsulot nomi" style="padding:12px; border-radius:12px; border:1px solid var(--border); font-weight:700;">
+                </div>
+                
+                <div style="padding:15px; background:var(--bg); border-radius:15px;">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+                        <input type="checkbox" id="edit-check-fixed" style="width:20px; height:20px;">
+                        <label for="edit-check-fixed" style="font-weight:700; cursor:pointer;">O'lchamli narxlar (S, M, L)</label>
+                    </div>
+                    <div id="edit-fixed-prices-input" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+                        <div>
+                            <small style="color:var(--gray);">Kichik</small>
+                            <input type="number" id="edit-p-s" placeholder="Narx" style="padding:10px; width:100%; border-radius:10px; border:1px solid var(--border);">
+                        </div>
+                        <div>
+                            <small style="color:var(--gray);">O'rtacha</small>
+                            <input type="number" id="edit-p-m" placeholder="Narx" style="padding:10px; width:100%; border-radius:10px; border:1px solid var(--border);">
+                        </div>
+                        <div>
+                            <small style="color:var(--gray);">Katta</small>
+                            <input type="number" id="edit-p-l" placeholder="Narx" style="padding:10px; width:100%; border-radius:10px; border:1px solid var(--border);">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="padding:15px; background:var(--bg); border-radius:15px;">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+                        <input type="checkbox" id="edit-check-sqm" style="width:20px; height:20px;">
+                        <label for="edit-check-sqm" style="font-weight:700; cursor:pointer;">Kvadrat metr (m²) bo'yicha</label>
+                    </div>
+                    <div id="edit-sqm-price-input">
+                        <small style="color:var(--gray);">1 m² narxi</small>
+                        <input type="number" id="edit-p-sqm" placeholder="Narx" style="padding:10px; width:100%; border-radius:10px; border:1px solid var(--border);">
+                    </div>
+                </div>
+
+                <div style="padding:15px; background:var(--bg); border-radius:15px;">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+                        <input type="checkbox" id="edit-check-kg" style="width:20px; height:20px;">
+                        <label for="edit-check-kg" style="font-weight:700; cursor:pointer;">Kilogramm (KG) bo'yicha</label>
+                    </div>
+                    <div id="edit-kg-price-input" style="display:none;">
+                        <small style="color:var(--gray);">1 kg narxi</small>
+                        <input type="number" id="edit-p-kg" placeholder="Narx" style="padding:10px; width:100%; border-radius:10px; border:1px solid var(--border);">
+                    </div>
+                </div>
+
+                <div style="padding:15px; background:var(--bg); border-radius:15px;">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+                        <input type="checkbox" id="edit-check-meter" style="width:20px; height:20px;">
+                        <label for="edit-check-meter" style="font-weight:700; cursor:pointer;">Metr (m) bo'yicha</label>
+                    </div>
+                    <div id="edit-meter-price-input" style="display:none;">
+                        <small style="color:var(--gray);">1 m narxi</small>
+                        <input type="number" id="edit-p-meter" placeholder="Narx" style="padding:10px; width:100%; border-radius:10px; border:1px solid var(--border);">
+                    </div>
+                </div>
+
+                <button class="btn-save" style="width:100%; height: 55px; font-size: 16px;" onclick="saveProductUpdate()">O'zgarishlarni saqlash</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script src="js/admin.js"></script>
 </body>
 </html>
