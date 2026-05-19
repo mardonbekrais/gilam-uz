@@ -379,7 +379,10 @@ function openDeliveryDetails(order) {
     if (order.status === 'ready') {
         const mapBtn = document.createElement('button'); mapBtn.className = 'det-nav-btn'; mapBtn.style.background = 'var(--primary)'; mapBtn.style.color = 'white';
         mapBtn.innerHTML = '<i class="fas fa-map-marked-alt"></i> Yo\'lga chiqish'; 
-        mapBtn.onclick = () => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.location)}`, '_blank');
+        mapBtn.onclick = () => {
+            const query = order.gpsCoords ? order.gpsCoords : encodeURIComponent(order.location);
+            window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+        };
         nav.appendChild(mapBtn);
 
         const btn = document.createElement('button'); btn.className = 'det-nav-btn'; btn.style.background = 'var(--success)'; btn.style.color = 'white';
