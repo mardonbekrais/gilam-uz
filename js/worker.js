@@ -41,11 +41,27 @@ function displayOrders() {
                 <span>${order.customerName || 'Noma\'lum'}</span>
             </div>
             
+            <div style="font-weight:700; color:var(--primary); margin: 6px 0; font-size:15px;">
+                <i class="fas fa-phone-alt" style="font-size:13px;"></i> 
+                <a href="tel:${order.phone}" style="text-decoration:none; color:inherit;" onclick="event.stopPropagation()">${order.phone}</a>
+            </div>
+
+            <div style="font-size:13px; color:var(--dark-secondary); margin-bottom:10px; display:flex; align-items:flex-start; gap:6px;">
+                <i class="fas fa-map-marker-alt" style="color:var(--danger); font-size:13px; margin-top:3px;"></i>
+                <span>${order.location}</span>
+            </div>
+            
             ${getOrderSummaryHtml(order.productItems)}
+
+            ${order.comment ? `
+                <div style="font-size:12px; color:var(--gray); background:var(--bg); padding:8px 12px; border-radius:10px; margin-top:8px; border-left:3px solid var(--warning);">
+                    <strong>Izoh:</strong> ${order.comment}
+                </div>
+            ` : ''}
 
             <div class="order-details">
                 <span><i class="far fa-clock"></i> ${formatDateTime(order.createdAt)}</span>
-                <span style="font-weight:800; color:var(--primary);">${order.totalArea} m²/kg</span>
+                <span style="font-weight:800; color:var(--primary);">${order.totalArea} m²/kg/m</span>
             </div>
         `;
         div.onclick = () => openOrderDetails(order);
@@ -82,6 +98,10 @@ function openOrderDetails(order) {
             <div style="font-size:24px; font-weight:900;">#${order.displayId}</div>
             <div style="font-size:16px; font-weight:700; margin-top:5px;">${sc.emoji} ${sc.label}</div>
             <div style="font-weight:600; margin-top:5px; color:var(--dark-secondary);">Mijoz: ${order.customerName}</div>
+            <div style="font-weight:700; color:var(--primary); margin-top:8px; font-size:18px;">
+                <a href="tel:${order.phone}" style="text-decoration:none; color:inherit;">📞 ${order.phone}</a>
+            </div>
+            <div style="font-size:14px; margin-top:8px; color:var(--gray); font-weight:500;">📍 ${order.location}</div>
         </div>
         <div style="margin-bottom:20px;">
             <div style="font-weight:800; margin-bottom:12px; color:var(--primary); font-size:16px; display:flex; align-items:center; gap:8px;">
